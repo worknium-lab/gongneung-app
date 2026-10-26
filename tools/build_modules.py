@@ -102,10 +102,10 @@ if '/* ---------- 통합 앱 안에서 ---------- */' not in s:
 <div class="wrap" id="app">''')
 # 입력하면 기기에 바로 저장 (오프라인에서도 기록이 남고, 연결되면 서버로)
 s = rep(s, "  schedulePreview(); saveDraft();\n});\n$$('form')", "  schedulePreview(); saveDraft(); autoSave();\n});\n$$('form')")
-s = rep(s, "$('addEq').onclick =", "let asT = 0; function autoSave() { clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }\n$('addEq').onclick =")
+s = rep(s, "$('addEq').onclick =", "let asT = 0; function autoSave() { window.__touched = true; clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }\n$('addEq').onclick =")
 # 새 날짜를 열면 공정률 실시값은 공정률 탭(그날 마감 기준)에서 가져옴
 s = rep(s, "  S.tbm.hazards = buildHazards(detectKeys(S));\n}\nasync function openDate(date) {",
-        "  S.tbm.hazards = buildHazards(detectKeys(S));\n  try { const r = window.parent.RATE_AT && window.parent.RATE_AT(date); if (r != null) S.pAct = (r * 100).toFixed(2); } catch (e) {}\n}\nasync function openDate(date) {")
+        "  S.tbm.hazards = buildHazards(detectKeys(S));\n  try { const r = window.parent.RATE_AT && window.parent.RATE_AT(date); if (r != null) S.pAct = (r * 100).toFixed(2); } catch (e) {}\n  window.__openedNew = date; window.__touched = false;\n}\nasync function openDate(date) {")
 # 다른 기기에서 저장한 일보도 바로 반영 (한 번 읽기 → 실시간 구독)
 s = rep(s, """  try {
     const cfg = await db.doc('config/site').get();
@@ -125,6 +125,8 @@ s = rep(s, """  try {
     all.docs.forEach(d => { const r = d.data(); if (r && r.date) reports[r.date] = r; });
     savedDates = Object.keys(reports).sort().reverse();
     if (first) { first = false; await openDate(window.START_DATE || todayISO()); }
+    // 처음 설치한 기기: 서버 기록이 늦게 도착하면, 손대지 않은 새 일보 대신 저장된 일보를 다시 연다 (빈 일보로 덮어쓰기 방지)
+    else if (window.__openedNew === S.date && reports[S.date] && !window.__touched) { window.__openedNew = null; await openDate(S.date); }
     renderCal(); renderEditing(); if (view === 'report') renderReport();
     window.dispatchEvent(new Event('ilbo-reports'));
   });""")

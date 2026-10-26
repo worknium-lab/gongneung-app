@@ -695,7 +695,7 @@ app.addEventListener('click', (ev) => {
   else { S.materials.splice(+t.dataset.delMt, 1); renderMat(); }
   schedulePreview(); saveDraft();
 });
-let asT = 0; function autoSave() { clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }
+let asT = 0; function autoSave() { window.__touched = true; clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }
 $('addEq').onclick = () => { S.equip.push({ name: '', spec: '', prev: 0, today: 0 }); renderEquip(); };
 $('addMt').onclick = () => { S.materials.push({ name: '', spec: '', qty: '', use: '', note: '' }); renderMat(); };
 $('regen').onclick = () => { S.tbm.edited = false; maybeRegen(); schedulePreview(); };
@@ -1045,6 +1045,7 @@ function carryFrom(prev, date) {
   };
   S.tbm.hazards = buildHazards(detectKeys(S));
   try { const r = window.parent.RATE_AT && window.parent.RATE_AT(date); if (r != null) S.pAct = (r * 100).toFixed(2); } catch (e) {}
+  window.__openedNew = date; window.__touched = false;
 }
 async function openDate(date) {
   if (!date) return;
@@ -1106,6 +1107,8 @@ setView((location.hash || '').slice(1) || 'calendar', false);
     all.docs.forEach(d => { const r = d.data(); if (r && r.date) reports[r.date] = r; });
     savedDates = Object.keys(reports).sort().reverse();
     if (first) { first = false; await openDate(window.START_DATE || todayISO()); }
+    // 처음 설치한 기기: 서버 기록이 늦게 도착하면, 손대지 않은 새 일보 대신 저장된 일보를 다시 연다 (빈 일보로 덮어쓰기 방지)
+    else if (window.__openedNew === S.date && reports[S.date] && !window.__touched) { window.__openedNew = null; await openDate(S.date); }
     renderCal(); renderEditing(); if (view === 'report') renderReport();
     window.dispatchEvent(new Event('ilbo-reports'));
   });

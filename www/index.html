@@ -301,7 +301,7 @@ let REPORTS = {}, PHOTOS = [];
 const fProg = $('fProg'), fIlbo = $('fIlbo');
 const PW = () => fProg.contentWindow, IW = () => fIlbo.contentWindow;
 window.START_DATE = DATE;
-window.RATE_AT = day => { try { const rp = PW() && PW().RP; return rp ? rp.rateAt(day) : null; } catch (e) { return null; } };
+window.RATE_AT = day => { try { const rp = PW() && PW().RP; return rp && rp.ready() ? rp.rateAt(day) : null; } catch (e) { return null; } };
 
 /* ---------------- 탭 ---------------- */
 function setTab(t) {
