@@ -1,0 +1,9 @@
+{
+  "appId": "kr.worknium.gongneung",
+  "appName": "공릉천교",
+  "webDir": "www",
+  "android": {
+    "adjustMarginsForEdgeToEdge": "force",
+    "allowMixedContent": false
+  }
+}

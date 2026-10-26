@@ -1,0 +1,30 @@
+{
+  "name": "gongneung-app",
+  "version": "1.0.0",
+  "description": "공릉천교 현장 앱",
+  "main": "index.js",
+  "scripts": {
+    "build": "python3 tools/build_modules.py && npx cap sync android",
+    "mock": "python3 tools/mock_supabase.py 8787"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^7.6.9",
+    "@capacitor/app": "^7.1.2",
+    "@capacitor/core": "^7.6.9",
+    "@capacitor/filesystem": "^7.1.9",
+    "@capacitor/share": "^7.0.4",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/ibm-plex-sans-kr": "^5.3.0",
+    "@supabase/supabase-js": "^2.118.0",
+    "docx": "^9.5.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.6.9"
+  },
+  "private": true
+}

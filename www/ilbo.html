@@ -1,0 +1,1116 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>공릉천교 일보·TBM</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="css/fonts.css">
+<script>
+window.EMBED = window.parent !== window;
+if (window.EMBED && window.parent.claude) window.claude = window.parent.claude;
+document.documentElement.classList.toggle('embed', window.EMBED);
+</script>
+<style>
+/* Layout: site-office clipboard — form column on the left, A4 paper preview on the right; stacks on phones */
+:root {
+  --bg: #eef0ee;
+  --panel: #ffffff;
+  --ink: #1d2327;
+  --muted: #5d676c;
+  --line: #cfd5d3;
+  --navy: #1f3864;        /* 서식 5 badge colour, carried from the TBM form */
+  --navy-ink: #ffffff;
+  --hivis: #f2b705;       /* hi-vis amber for hazard marks */
+  --hazard-bg: #fff7dc;
+  --ok: #2f7a4a;
+  --warn: #b5401f;
+  --paper: #ffffff;
+  --paper-ink: #000000;
+  --paper-fill: #ececec;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #151a1d; --panel: #1e2529; --ink: #e5e9ea; --muted: #9aa5aa; --line: #374247;
+    --navy: #6f8fd0; --navy-ink: #0e1420; --hivis: #f2c230; --hazard-bg: #2c2712;
+    --ok: #6cc28f; --warn: #ef8a6a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #151a1d; --panel: #1e2529; --ink: #e5e9ea; --muted: #9aa5aa; --line: #374247;
+  --navy: #6f8fd0; --navy-ink: #0e1420; --hivis: #f2c230; --hazard-bg: #2c2712;
+  --ok: #6cc28f; --warn: #ef8a6a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+.wrap { max-width: 1440px; margin: 0 auto; padding-block: 16px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 16px; }
+.badge { background: var(--navy); color: var(--navy-ink); font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: .04em; font-size: 13px; }
+h1 { font-size: 20px; margin: 0; text-wrap: balance; }
+.site { color: var(--muted); font-size: 13px; }
+.status { margin-left: auto; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--ok); } .dot.warn { background: var(--warn); }
+.grid { display: grid; grid-template-columns: minmax(0, 520px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; display: grid; gap: 18px; min-width: 0; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; min-width: 0; }
+legend { font-weight: 700; font-size: 13px; letter-spacing: .02em; margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 0; }
+legend .n { font-family: var(--font-num); color: var(--navy); }
+legend small { font-weight: 400; color: var(--muted); }
+label { display: grid; gap: 4px; font-size: 12px; color: var(--muted); min-width: 0; }
+input, select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 7px 9px; width: 100%; min-width: 0; }
+textarea { resize: vertical; line-height: 1.55; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+input[type=number] { font-family: var(--font-num); text-align: right; }
+.row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+.two { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+@media (max-width: 480px) { .two { grid-template-columns: 1fr; } }
+.mini { display: grid; gap: 6px; }
+.mini .hd, .mini .it { display: grid; gap: 6px; align-items: center; }
+.mini .hd { font-size: 11px; color: var(--muted); }
+.eq .hd, .eq .it { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr) 62px 62px 52px 28px; }
+.mt .hd, .mt .it { grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,1.1fr) minmax(0,.8fr) 28px; }
+.mini input { padding: 5px 6px; font-size: 13px; }
+.cum { font-family: var(--font-num); text-align: right; font-size: 13px; color: var(--muted); }
+.labor { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 6px; }
+@media (max-width: 480px) { .labor { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.sum { font-size: 12px; color: var(--muted); font-family: var(--font-num); }
+button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; }
+button.primary { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); font-weight: 600; }
+button.ghost { border-style: dashed; color: var(--muted); font-size: 12px; padding: 5px 10px; justify-self: start; }
+button.x { padding: 0; width: 28px; height: 28px; color: var(--muted); }
+button:disabled { opacity: .5; cursor: default; }
+.hz { display: grid; gap: 6px; counter-reset: hz; }
+.hz .h { display: grid; grid-template-columns: 26px minmax(0,1fr); gap: 6px; align-items: start; }
+.hz .h::before { counter-increment: hz; content: counter(hz); font-family: var(--font-num); font-size: 12px; text-align: center; padding-top: 6px; background: var(--hazard-bg); border-left: 3px solid var(--hivis); border-radius: 2px; height: 30px; }
+.hz textarea { padding: 5px 8px; font-size: 13px; min-height: 30px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; }
+.tag { border: 1px solid var(--hivis); background: var(--hazard-bg); padding: 1px 7px; border-radius: 10px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.msg { font-size: 12px; color: var(--muted); }
+.msg.err { color: var(--warn); }
+details summary { cursor: pointer; font-weight: 600; font-size: 13px; }
+.hint { font-size: 12px; color: var(--muted); margin: 0; }
+
+/* preview */
+.preview { min-width: 0; display: grid; gap: 10px; position: sticky; top: env(safe-area-inset-top, 0px); }
+@media (max-width: 980px) { .preview { position: static; } }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.tabs button { border-radius: 4px 4px 0 0; border-bottom: 0; }
+.tabs button[aria-selected="true"] { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.sheetbox { overflow: auto; max-height: calc(100vh - 140px); background: #9aa3a6; border-radius: 0 6px 6px 6px; padding: 16px; }
+@media (max-width: 980px) { .sheetbox { max-height: none; } }
+.paper { background: var(--paper); color: var(--paper-ink); width: 210mm; min-height: 297mm; padding: 14mm 15mm; margin: 0 auto; font-family: "Malgun Gothic", "Apple SD Gothic Neo", var(--font-body); font-size: 9pt; transform-origin: top left; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+.paper table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.paper td, .paper th { border: 1px solid #000; padding: 2px 4px; height: 6.2mm; text-align: center; font-weight: 400; overflow-wrap: anywhere; }
+.paper th, .paper .f { background: var(--paper-fill); font-weight: 600; }
+.paper .l { text-align: left; }
+.paper .t1 { text-align: center; font-size: 20pt; font-weight: 700; letter-spacing: .6em; margin: 4mm 0 5mm; }
+.paper .t2 { text-align: center; font-size: 17pt; font-weight: 700; text-decoration: underline; margin: 3mm 0 3mm; }
+.paper h4 { font-size: 10pt; margin: 4mm 0 1.5mm; }
+.paper .r { text-align: right; margin: 1.5mm 0 0; }
+.paper .blue { color: #0033cc; }
+.paper .red { color: #ff0000; }
+.paper .hzr td { height: 10.4mm; text-align: left; }
+.paper .sig td { height: 7.4mm; }
+.paper .formhd { display: flex; gap: 3mm; align-items: stretch; }
+.paper .formhd .b5 { background: #1f3864; color: #fff; font-weight: 700; padding: 1.5mm 4mm; font-size: 11pt; }
+.paper .formhd .bt { border: 1px solid #000; flex: 1; padding: 1.5mm 3mm; font-weight: 700; font-size: 11pt; }
+.paper .slash { background: linear-gradient(to top right, transparent calc(50% - .5px), #000 50%, transparent calc(50% + .5px)); }
+.paper .foot { text-align: right; margin-top: 6mm; letter-spacing: .2em; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* calendar */
+.cal { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px 16px; margin-bottom: 20px; display: grid; gap: 10px; }
+.calhd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.calhd h2 { font-size: 18px; margin: 0; font-family: var(--font-num); letter-spacing: .02em; min-width: 7.5em; text-align: center; }
+.calhd .nav { display: flex; align-items: center; gap: 6px; }
+.calhd .nav button { width: 32px; height: 32px; padding: 0; }
+.calsum { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.calsum b { color: var(--ink); font-weight: 600; }
+.calhd .grow { flex: 1; }
+.dow, .calgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.dow span { font-size: 11px; color: var(--muted); text-align: center; padding-bottom: 2px; }
+.dow span:first-child, .day.sun .dn { color: var(--warn); }
+.dow span:last-child, .day.sat .dn { color: var(--navy); }
+.day { all: unset; box-sizing: border-box; cursor: pointer; min-width: 0; min-height: 86px; border: 1px solid var(--line); border-radius: 4px; padding: 5px 6px; display: flex; flex-direction: column; gap: 2px; background: var(--bg); position: relative; }
+.day:hover { border-color: var(--navy); }
+.day:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+.day.out { visibility: hidden; }
+.day.has { background: var(--panel); border-left: 3px solid var(--navy); }
+.day.sel { box-shadow: inset 0 0 0 2px var(--navy); }
+.day.today .dn::after { content: "오늘"; font-family: var(--font-body); font-size: 10px; margin-left: 5px; color: var(--navy-ink); background: var(--navy); padding: 0 5px; border-radius: 8px; vertical-align: 1px; }
+.dn { font-family: var(--font-num); font-size: 13px; display: flex; align-items: baseline; justify-content: space-between; gap: 4px; }
+.dn .wx { font-family: var(--font-body); font-size: 10px; color: var(--muted); white-space: nowrap; }
+.ppl { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--ink); }
+.ppl i { font-style: normal; color: var(--muted); }
+.job { font-size: 11px; color: var(--muted); line-height: 1.35; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.day.empty .job { color: var(--line); }
+@media (max-width: 640px) {
+  .day { min-height: 56px; padding: 4px; }
+  .job, .dn .wx { display: none; }
+  .ppl i { display: none; }
+  .day.today .dn::after { content: ""; width: 6px; height: 6px; padding: 0; border-radius: 50%; display: inline-block; }
+}
+.editing { font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.editing .pill { font-size: 11px; font-weight: 500; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); }
+.editing .pill.saved { border-color: var(--ok); color: var(--ok); }
+
+/* tabs */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.tabbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; flex-wrap: wrap; align-items: end; gap: 8px 16px; border-bottom: 2px solid var(--navy); margin-bottom: 12px; padding-top: 4px; }
+.tabbar .tabs { display: flex; gap: 2px; overflow-x: auto; min-width: 0; }
+.tabbar .tabs button { border: 1px solid var(--line); border-bottom: 0; border-radius: 5px 5px 0 0; background: var(--panel); padding: 9px 16px; font-weight: 600; white-space: nowrap; color: var(--muted); }
+.tabbar .tabs button[aria-selected="true"] { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.tabbar .tabs button .k { font-family: var(--font-num); font-weight: 500; font-size: 11px; opacity: .7; margin-right: 6px; }
+.tabbar .editing { margin-left: auto; padding-bottom: 8px; }
+@media (max-width: 640px) { .tabbar .tabs button { padding: 8px 10px; font-size: 13px; } .tabbar .tabs button .k { display: none; } .tabbar .editing { margin-left: 0; width: 100%; padding-bottom: 6px; order: -1; } }
+.msgbar { min-height: 20px; margin: 0 0 12px; }
+.view[hidden] { display: none !important; }
+.subtabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.subtabs button { border-radius: 4px 4px 0 0; border-bottom: 0; }
+.subtabs button[aria-selected="true"] { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); }
+.sheetbox.solo { border-radius: 6px; }
+
+/* report tab */
+.report { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 980px) { .report { grid-template-columns: minmax(0, 1fr); } }
+.opt { display: grid; gap: 8px; }
+.choice { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); }
+.choice input { width: auto; }
+.range { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; }
+.range span { color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--font-num); font-size: 12px; padding: 2px 8px; border-radius: 10px; border: 1px solid var(--navy); color: var(--navy); background: var(--panel); }
+.chip.draft { border-style: dashed; color: var(--muted); border-color: var(--line); }
+.big { font-size: 15px; padding: 10px 18px; }
+.progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--navy); transition: width .2s; }
+.count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.count b { color: var(--ink); }
+#pdfStage { position: fixed; left: -12000px; top: 0; }
+#pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }
+
+/* pane switch + zoom (phone) */
+.seg { display: none; }
+.zoombtn { font-size: 12px; padding: 4px 10px; justify-self: end; }
+.prevtools { display: flex; align-items: end; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.sheetbox.zoom .paper { transform: none !important; margin: 0 !important; }
+
+/* ---------- phone (Galaxy S25 Ultra ≈ 412 × 915 CSS px) ---------- */
+@media (max-width: 640px) {
+  body { font-size: 15px; }
+  .wrap { padding-block: 10px calc(76px + env(safe-area-inset-bottom, 0px)); }
+  header.top { gap: 6px 10px; margin-bottom: 10px; }
+  header.top h1 { font-size: 17px; }
+  .status { margin-left: 0; width: 100%; }
+  /* bottom navigation */
+  .tabbar { position: static; border-bottom: 0; margin-bottom: 4px; padding-top: 0; }
+  .tabbar .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--panel); border-top: 1px solid var(--line);
+    display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0; overflow: visible;
+    padding: 4px max(8px, env(safe-area-inset-right, 0px)) calc(4px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+  .tabbar .tabs button { border: 0; border-radius: 8px; background: transparent; min-height: 52px; padding: 4px 2px; font-size: 13px; line-height: 1.2; white-space: normal; }
+  .tabbar .tabs button .k { display: block; margin: 0 0 2px; font-size: 11px; }
+  .tabbar .tabs button[aria-selected="true"] { background: var(--navy); color: var(--navy-ink); }
+  .tabbar .editing { width: 100%; margin: 0; padding: 0; order: 0; font-size: 15px; }
+  /* touch sizes */
+  input, select, textarea { font-size: 16px; padding: 10px 11px; }
+  button { min-height: 44px; padding: 10px 14px; }
+  button.x { width: 44px; height: 44px; min-height: 44px; }
+  button.ghost { min-height: 40px; }
+  .panel { padding: 14px 12px; }
+  .row { grid-template-columns: 1fr 1fr; }
+  .labor { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .labor input { text-align: center; }
+  #laborSum input { min-height: 36px; }
+  /* equipment: name + spec on top line, numbers below */
+  .eq .hd { display: none; }
+  .eq .it { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 44px; grid-template-areas: "n s x" "p t c"; row-gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .eq .it > :nth-child(1) { grid-area: n; } .eq .it > :nth-child(2) { grid-area: s; }
+  .eq .it > :nth-child(3) { grid-area: p; } .eq .it > :nth-child(4) { grid-area: t; }
+  .eq .it > :nth-child(5) { grid-area: c; align-self: center; text-align: center; }
+  .eq .it > :nth-child(6) { grid-area: x; }
+  .eq .it > :nth-child(3)::placeholder, .eq .it > :nth-child(4)::placeholder { color: var(--muted); }
+  /* materials: two-column card */
+  .mt .hd { display: none; }
+  .mt .it { grid-template-columns: 1fr 1fr 44px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; }
+  .mt .it > :nth-child(1) { grid-column: 1; } .mt .it > :nth-child(2) { grid-column: 2; }
+  .mt .it > :nth-child(6) { grid-column: 3; grid-row: 1; }
+  .mt .it > :nth-child(3), .mt .it > :nth-child(4), .mt .it > :nth-child(5) { grid-column: span 1; }
+  .hz .h { grid-template-columns: 30px minmax(0, 1fr); }
+  .hz textarea { font-size: 15px; }
+  /* input / preview switch */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--navy); border-radius: 8px; overflow: hidden; margin-bottom: 10px; }
+  .seg button { border: 0; border-radius: 0; background: var(--panel); color: var(--navy); font-weight: 600; }
+  .seg button[aria-selected="true"] { background: var(--navy); color: var(--navy-ink); }
+  .view[data-pane="form"] .preview { display: none; }
+  .view[data-pane="preview"] form.panel { display: none; }
+  .sheetbox { padding: 8px; max-height: none; }
+  /* sticky save bar above bottom nav */
+  form.panel > .actions { position: sticky; bottom: calc(64px + env(safe-area-inset-bottom, 0px)); background: var(--panel); padding: 8px 0 4px; border-top: 1px solid var(--line); z-index: 4; }
+  form.panel > .actions button { flex: 1 1 30%; }
+  .calhd h2 { font-size: 17px; min-width: 6em; }
+  .calsum { width: 100%; }
+  .range { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .choice input { width: 20px; height: 20px; }
+  .big { width: 100%; }
+}
+
+.nl { display: block; min-width: 0; }
+.nl small, .cum small { display: none; }
+.preview { top: calc(env(safe-area-inset-top, 0px) + 60px); }
+.sheetbox { max-height: calc(100vh - 190px); }
+@media (max-width: 640px) {
+  .nl { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 6px; }
+  .nl small, .cum small { display: inline; font-size: 12px; color: var(--muted); }
+  .cum b { font-family: var(--font-num); font-size: 15px; color: var(--ink); }
+}
+/* ---------- 통합 앱 안에서 ---------- */
+.embed header.top, .embed .tabbar { display: none !important; }
+.embed .wrap { padding-block: 12px 24px !important; }
+:root.embed { --bg: #f3f5f6; --line: #d3d9dd; --navy: #1d5d86; --ink: #162027; --muted: #5b6871; }
+.embed .msgbar:empty { display: none; }
+</style>
+
+<div class="wrap" id="app">
+  <header class="top">
+    <span class="badge">일보·TBM</span>
+    <div>
+      <h1>공릉천교 작업일보 · TBM 회의록</h1>
+      <div class="site" id="siteLine">2026년 파주 공릉천교 내진보강공사 · ㈜에프엠이엔씨</div>
+    </div>
+    <div class="status"><span class="dot" id="dbDot"></span><span id="dbText">기록 저장소 연결 중…</span></div>
+  </header>
+
+  <nav class="tabbar">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-view="calendar" aria-selected="true"><span class="k">01</span>달력</button>
+      <button type="button" role="tab" data-view="ilbo" aria-selected="false"><span class="k">02</span>작업일보</button>
+      <button type="button" role="tab" data-view="tbm" aria-selected="false"><span class="k">03</span>TBM</button>
+      <button type="button" role="tab" data-view="report" aria-selected="false"><span class="k">04</span>보고서 출력(PDF)</button>
+    </div>
+    <div class="editing" id="editing"></div>
+  </nav>
+  <p class="msg msgbar" id="msg" role="status"></p>
+
+  <!-- 01 달력 -->
+  <section class="view" id="v-calendar">
+    <div class="cal" aria-label="작업일보 달력">
+      <div class="calhd">
+        <div class="nav">
+          <button type="button" id="calPrev" aria-label="이전 달">‹</button>
+          <h2 id="calTitle">2026.10</h2>
+          <button type="button" id="calNext" aria-label="다음 달">›</button>
+        </div>
+        <button type="button" id="calToday">오늘</button>
+        <span class="grow"></span>
+        <span class="calsum" id="calSum"></span>
+      </div>
+      <div class="dow"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>
+      <div class="calgrid" id="calGrid"></div>
+      <p class="hint">날짜를 누르면 작업일보 탭에서 그날 일보를 작성하거나 고칠 수 있습니다. 파란 테두리는 저장된 일보입니다.</p>
+    </div>
+  </section>
+
+  <!-- 02 작업일보 -->
+  <section class="view" id="v-ilbo" data-pane="form" hidden>
+    <div class="seg" role="tablist" aria-label="입력 또는 미리보기">
+      <button type="button" role="tab" data-pane="form" aria-selected="true">입력</button>
+      <button type="button" role="tab" data-pane="preview" aria-selected="false">미리보기</button>
+    </div>
+    <div class="grid">
+      <form class="panel" id="formIlbo" autocomplete="off">
+        <fieldset>
+          <legend><span class="n">01</span> 일자 · 날씨</legend>
+          <div class="row">
+            <label>일자<input type="date" id="date"></label>
+            <label>날씨<select id="weather"><option>맑음</option><option>흐림</option><option>비</option><option>눈</option><option>강풍</option></select></label>
+            <label>공정률 계획(%)<input id="pPlan" inputmode="decimal" placeholder="20.91"></label>
+            <label>공정률 실시(%)<input id="pAct" inputmode="decimal" placeholder="20.91"></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">02</span> 작업내용 <small>한 줄에 한 작업 · 세부는 "-"로 시작</small></legend>
+          <div class="two">
+            <label>금일작업 (실행)<textarea id="today" rows="7" placeholder="기존받침 철거&#10;- P3 와이어쏘우 컷팅&#10;신규받침 솔플레이트 용접&#10;수직보강재 천공/설치 (P8, P9)"></textarea></label>
+            <label>명일작업 (계획)<textarea id="next" rows="7" placeholder="기존받침 철거&#10;- A1 와이어쏘우 컷팅&#10;P3 베드블럭 철거"></textarea></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">03</span> 인력 <small>주간 · 명</small></legend>
+          <div class="labor" id="labor"></div>
+          <div class="sum" id="laborSum"></div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">04</span> 장비 <small>전일 = 앞 일보의 누계</small></legend>
+          <div class="mini eq" id="equip"></div>
+          <button type="button" class="ghost" id="addEq">+ 장비 추가</button>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">05</span> 자재</legend>
+          <div class="mini mt" id="mat"></div>
+          <button type="button" class="ghost" id="addMt">+ 자재 추가</button>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">06</span> 특기사항 <small>한 줄씩</small></legend>
+          <textarea id="notes" rows="3" placeholder="교량인상 104개소 / 208개소 (A1, P2, P3, P6, P7, P10, P11)"></textarea>
+        </fieldset>
+        <div class="actions">
+          <button type="button" class="primary" data-act="save">저장</button>
+          <button type="button" data-act="wr">작업일보 Word</button>
+          <button type="button" data-goto="tbm">TBM 작성 →</button>
+        </div>
+      </form>
+      <section class="preview" aria-label="작업일보 미리보기">
+        <div class="prevtools"><span></span><button type="button" class="zoombtn" data-zoom="boxWr">원래 크기로</button></div>
+        <div class="sheetbox solo" id="boxWr"><div class="paper" id="paperWr"></div></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- 03 TBM -->
+  <section class="view" id="v-tbm" data-pane="form" hidden>
+    <div class="seg" role="tablist" aria-label="입력 또는 미리보기">
+      <button type="button" role="tab" data-pane="form" aria-selected="true">입력</button>
+      <button type="button" role="tab" data-pane="preview" aria-selected="false">미리보기</button>
+    </div>
+    <div class="grid">
+      <form class="panel" id="formTbm" autocomplete="off">
+        <fieldset>
+          <legend><span class="n">07</span> TBM 전달 사항 <small>금일작업·날씨·장비로 자동 작성, 직접 고쳐도 됨</small></legend>
+          <div class="row">
+            <label>TBM 시작<input id="tStart" type="time" value="09:00"></label>
+            <label>종료<input id="tEnd" type="time" value="17:00"></label>
+            <label>TBM 장소<input id="tPlace" value="공릉천교"></label>
+          </div>
+          <p class="hint" id="tbmWork"></p>
+          <div class="tags" id="tags"></div>
+          <div class="hz" id="hz"></div>
+          <button type="button" class="ghost" id="regen">작업내용으로 다시 만들기</button>
+        </fieldset>
+        <details>
+          <summary>현장 정보</summary>
+          <div style="display:grid;gap:10px;margin-top:10px">
+            <label>현장명 · 공사명<input id="sName"></label>
+            <div class="two">
+              <label>도급사<input id="sCo"></label>
+              <label>현장대리인(소장)<input id="sMgr"></label>
+            </div>
+          </div>
+        </details>
+        <div class="actions">
+          <button type="button" class="primary" data-act="save">저장</button>
+          <button type="button" data-act="tbm">TBM 회의록 Word</button>
+          <button type="button" data-goto="report">보고서 출력 →</button>
+        </div>
+      </form>
+      <section class="preview" aria-label="TBM 미리보기">
+        <div class="subtabs" role="tablist">
+          <button type="button" role="tab" aria-selected="true" data-sub="tbm">TBM 회의록</button>
+          <button type="button" role="tab" aria-selected="false" data-sub="sig">참석자 서명지</button>
+          <button type="button" class="zoombtn" data-zoom="boxTbm" style="margin-left:auto">원래 크기로</button>
+        </div>
+        <div class="sheetbox" id="boxTbm"><div class="paper" id="paperTbm"></div></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- 04 보고서 출력 -->
+  <section class="view" id="v-report" hidden>
+    <div class="report">
+      <form class="panel" id="formReport" autocomplete="off">
+        <fieldset>
+          <legend><span class="n">A</span> 출력 범위</legend>
+          <div class="opt">
+            <label class="choice"><input type="radio" name="rMode" id="rOne" value="one" checked> <span id="rOneLabel">선택한 날짜</span></label>
+            <label class="choice"><input type="radio" name="rMode" id="rRange" value="range"> 기간 (저장된 일보만)</label>
+            <div class="range"><input type="date" id="rFrom" aria-label="시작일"><span>~</span><input type="date" id="rTo" aria-label="종료일"></div>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend><span class="n">B</span> 포함 문서</legend>
+          <div class="opt">
+            <label class="choice"><input type="checkbox" id="incWr" checked> 작업일보</label>
+            <label class="choice"><input type="checkbox" id="incTbm" checked> TBM 회의록</label>
+            <label class="choice"><input type="checkbox" id="incSig"> TBM 참석자 서명지</label>
+          </div>
+        </fieldset>
+        <div class="count" id="rCount"></div>
+        <div class="actions">
+          <button type="button" class="primary big" id="mkPdf">PDF 만들기</button>
+        </div>
+        <div class="progress" id="prog" hidden><i id="progBar"></i></div>
+        <fieldset>
+          <legend><span class="n">C</span> Word 파일 <small>선택한 날짜</small></legend>
+          <div class="actions">
+            <button type="button" data-act="wr">작업일보 Word</button>
+            <button type="button" data-act="tbm">TBM 회의록 Word</button>
+          </div>
+        </fieldset>
+      </form>
+      <section class="panel" aria-label="출력 대상">
+        <legend style="font-weight:700;font-size:13px">출력 대상 일보</legend>
+        <div class="chips" id="rChips"></div>
+        <p class="hint">PDF는 미리보기 화면 그대로 A4 한 장씩 담깁니다. 기간 출력은 날짜순으로 작업일보 → TBM 회의록 → 서명지 순서로 묶습니다.</p>
+      </section>
+    </div>
+  </section>
+  <div id="pdfStage" aria-hidden="true"></div>
+</div>
+
+<script src="vendor/docx.iife.js"></script>
+<script src="vendor/html2canvas.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script>
+(() => {
+'use strict';
+// ---------------- defaults ----------------
+const CATS = ['관리자', '반장', '작업원', '비계', '신호수', '인상'];
+const DEF_SITE = { name: '2026년 파주 공릉천교 내진보강공사', co: '㈜에프엠이엔씨', mgr: '박종호', mgrTitle: '현장대리인', place: '공릉천교' };
+const DEF_EQ = [['굴착기', '0.6w'], ['크레인', '5ton'], ['싸인카', ''], ['스카이', '1.5ton']];
+const DEF_MT = [
+  ['L형강', '130*130*15', '51.189ton', '수직보강', ''],
+  ['무수축모르타르', '600MPa', '1,080포', '단면확대부', '80포/1m3'],
+  ['철근', 'D16', '11.376ton', '단면확대 / 철근보강', ''],
+  ['철근', 'D25', '11.376ton', '단면확대 / 철근보강', ''],
+  ['탄성받침', '4,300kN 외', '136EA', '', ''],
+];
+
+// ---------------- hazard library ----------------
+const HEALTH = '작업 전 근로자 건강상태·음주 여부 확인, 신규·외국인 근로자 작업위치 및 대피경로 별도 교육';
+const FILL = ['안전모 턱끈·안전화·안전대 등 개인보호구 착용 상태 상호 확인',
+  '교량 하부 통행로 낙하물 방지망 및 출입 통제 구역 확인',
+  '위험 발견 시 누구나 작업 중지 가능, 즉시 관리감독자에게 보고',
+  '고소작업 시 안전대 체결 후 작업, 작업발판 고정·안전난간 상태 확인'];
+const LIB = {
+  form: ['거푸집 설치 시 거푸집과 교각·거더 사이 손끼임 주의 → 2인 1조로 맞춤 작업', '거푸집 판재 절단 시 원형톱·그라인더 날 덮개 확인, 장갑 말림 주의', '폼타이·지지재 체결 상태 확인, 임시 고정 상태로 자리 이탈 금지'],
+  rust: ['그라인더·와이어브러시 녹 제거 시 숫돌 균열·덮개 확인, 보안경·방진마스크·귀마개 착용', '도장 시 유기용제(신나) 흡입 주의 → 방독마스크 착용, 환기 확보, 두통·어지럼 시 즉시 중지', '도장 구역 인근 화기작업 금지, 소화기 비치 및 금연, 도료는 뚜껑 닫아 지정장소 보관', '도료·녹 비산 방지 → 비산방지막 확인, 강풍 시 도장 중지'],
+  insp: ['검측 이동 시 작업발판 단부·개구부 주의, 이동 중에도 안전대 체결 유지'],
+  mortar: ['무수축 몰탈 혼합 시 분진·알칼리 피부 접촉 주의 → 보안경·방진마스크·고무장갑 착용', '몰탈 포대 운반 시 중량물 요통 주의 → 2인 운반, 무리한 자세 금지', '타설 중 거푸집 변형·누출 수시 확인, 이상 시 즉시 타설 중지 후 보고', '믹서 사용 전 전선 피복·누전차단기 확인, 회전부에 손 넣기 금지'],
+  haul: ['수직보강재(L형강) 인양 시 인양물 하부 출입 금지, 신호수 1인 지정 신호', '줄걸이 와이어·슬링 손상 여부 확인, 유도로프 사용으로 회전·흔들림 방지', '크레인 아웃트리거 완전 확장 및 받침판 설치, 작업반경 내 출입 통제', '도로 운반·하역 시 싸인카 배치 및 교통 통제 철저', 'L형강 상·하차 및 적치 시 손·발 협착 주의, 받침목 위 적치·전도 방지'],
+  vert: ['수직보강재(L형강) 거치 시 손 협착 주의, 고정 완료 전 손 이탈 금지', '앵커 천공 시 해머드릴 전선 피복·누전차단기 확인, 철근 걸림 시 무리하게 진행 금지', '공구·볼트류 낙하 방지 → 공구 낙하방지끈 착용, 하부 출입 통제'],
+  drill: ['천공 시 콘크리트 분진 발생 → 보안경·방진마스크 착용'],
+  scaf: ['강관비계·공중비계 설치 시 안전대 상시 체결(2중 고리), 단독 작업 금지', '비계 자재 인양·전달 시 결속 확인, 하부 출입 통제 및 낙하물 방지망 확인', '작업발판·안전난간 설치 완료 전 타 공종 사용 금지'],
+  rebar: ['철근 절단·가공 시 절단기 방호장치 확인, 노출 철근 끝 보호캡 설치'],
+  unload: ['자재 하역 시 크레인 작업반경 출입 통제, 적치 시 받침목 사용·전도 방지'],
+  jack: ['유압잭 설치 시 유압호스 손상·커플러 체결 상태 확인, 잭 하부에 손 넣기 금지', '잭 거치면 수평·지지력 확인, 인상업체 지시 없이 잭 조작 금지'],
+  lift: ['교량 인상 중 거더 하부 출입 금지, 인상업체(펜타드) 통제에 따름', '인상량 단계별 계측 확인, 이상 소음·변위 발생 시 즉시 작업 중지 및 보고', '임시 받침·가설 지지대는 지시 없이 해체·이동 금지'],
+  lower: ['교량 인하 시 인상업체 통제에 따라 단계별 인하량 확인, 거더 하부 출입 금지', '인하 중 신규받침과 거더 사이 손 끼임 주의, 신호 후 인하'],
+  wiresaw: ['와이어쏘우 컷팅 시 와이어 절단·튕김 대비 방호덮개 설치, 와이어 진행방향 출입 금지', '와이어쏘우 냉각수·슬러지로 작업발판 미끄럼 주의, 전원 누전차단기 연결 및 전선 침수 방지'],
+  bremove: ['받침 철거 중 상부구조 인상 상태 유지, 임시받침·가설지지대는 지시 없이 해체·이동 금지', '철거 받침(중량물)은 체인블록 등으로 결속 후 해체, 하부 출입 통제, 손 끼임 주의'],
+  chip: ['치핑기 파쇄 시 콘크리트 파편 비래 → 보안경·보안면 착용, 주변 출입 통제', '치핑기 사용 시 발 타박·진동 주의, 안전화 착용, 연속 사용 시간 제한'],
+  weld: ['용접 시 용접기 접지·홀더 절연 확인, 용접면·용접장갑·보안경 착용', '용접 불티 비산 방지포 설치, 소화기 비치 및 주변 가연물 제거, 작업 후 30분 잔불 확인'],
+  binstall: ['신규받침 거치 시 인양 결속 확인, 받침과 거더 사이 손 넣기 금지', '받침 위치·레벨 확인 후 고정, 몰탈 충전 전 거푸집 밀실 여부 확인'],
+  visit: ['방문객 현장 출입 시 안전모 등 보호구 착용, 안내자 동행 및 작업구역 접근 통제'],
+  sky: ['고소작업차(스카이) 아웃트리거 설치, 작업대 내 안전대 체결, 정격하중 준수'],
+  crane: ['크레인 작업 시 아웃트리거 최대 확장·받침판 설치, 신호수 1인 지정, 인양물 하부 출입 금지'],
+  traffic: ['차량 통행 구간 작업 시 싸인카·라바콘 설치, 신호수 형광조끼·경광봉 착용'],
+  cloud: ['흐린 날씨로 작업발판 미끄럼 주의, 순간풍속 10m/s 이상 시 고소작업 중지'],
+  rain: ['우천·습윤으로 작업발판 미끄럼 및 전동공구 누전 주의, 강우 시 고소·전기작업 중지'],
+  wind: ['강풍 시 고소작업·인양작업 중지(순간풍속 10m/s 이상), 자재·거푸집 결속 확인'],
+};
+const TAGN = { form: '거푸집', rust: '방청·도장', insp: '검측', mortar: '몰탈', haul: '운반·인양', vert: '수직보강재', drill: '천공', scaf: '비계', rebar: '철근', unload: '하역', jack: '유압잭', lift: '교량인상', lower: '교량인하', wiresaw: '와이어쏘우', bremove: '받침 철거', chip: '치핑', weld: '용접', binstall: '받침 설치', visit: '방문객', sky: '스카이', crane: '크레인', traffic: '교통', cloud: '흐림', rain: '비', wind: '강풍' };
+const RULES = [
+  [/거푸집/, 'form'], [/방청|도장/, 'rust'], [/검측/, 'insp'], [/몰탈|모르타르/, 'mortar'], [/운반/, 'haul'],
+  [/보강재.*(설치|천공)|(설치|천공).*보강재/, 'vert'], [/천공/, 'drill'], [/비계/, 'scaf'], [/철근/, 'rebar'],
+  [/반입|하역/, 'unload'], [/유압잭/, 'jack'], [/인상/, 'lift'], [/인하/, 'lower'], [/와이어|쏘우|컷팅/, 'wiresaw'],
+  [/(받침|베드).*철거|철거.*(받침|베드)/, 'bremove'], [/베드블럭|치핑|파쇄|할석/, 'chip'], [/용접|솔플레이트/, 'weld'],
+  [/신규받침|받침\s*(설치|거치)/, 'binstall'], [/방문/, 'visit'],
+];
+function detectKeys(s) {
+  const text = s.today + '\n';
+  const keys = [];
+  const add = (k) => { if (!keys.includes(k)) keys.push(k); };
+  RULES.map(([re, k]) => { const m = text.match(re); return m ? [m.index, k] : null; })
+    .filter(Boolean).sort((a, b) => a[0] - b[0]).forEach(([, k]) => add(k));
+  const eqToday = (re) => s.equip.some(e => re.test(e.name) && +e.today > 0);
+  if (eqToday(/스카이|고소작업/)) add('sky');
+  if (eqToday(/크레인/) && !keys.includes('haul')) add('crane');
+  if (+s.labor['신호수'] > 0 || eqToday(/싸인카/)) add('traffic');
+  if (s.weather === '흐림') add('cloud');
+  if (s.weather === '비' || s.weather === '눈') add('rain');
+  if (s.weather === '강풍') add('wind');
+  return keys;
+}
+function buildHazards(keys) {
+  const pools = keys.map(k => LIB[k].slice());
+  const out = [HEALTH];
+  let added = true;
+  while (out.length < 10 && added) {
+    added = false;
+    for (const p of pools) if (p.length && out.length < 10) { const h = p.shift(); if (!out.includes(h)) out.push(h); added = true; }
+  }
+  for (const f of FILL) if (out.length < 10 && !out.includes(f)) out.push(f);
+  return out.slice(0, 10);
+}
+
+// ---------------- state ----------------
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const blankEq = () => DEF_EQ.map(([name, spec]) => ({ name, spec, prev: 0, today: 0 }));
+const blankMt = () => DEF_MT.map(([name, spec, qty, use, note]) => ({ name, spec, qty, use, note }));
+const todayISO = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); };
+let site = { ...DEF_SITE };
+let S = {
+  date: todayISO(), weather: '맑음', pPlan: '', pAct: '', today: '', next: '',
+  labor: Object.fromEntries(CATS.map(c => [c, 0])), laborPrev: 0,
+  equip: blankEq(), materials: blankMt(), notes: '',
+  tbm: { start: '09:00', end: '17:00', place: DEF_SITE.place, hazards: buildHazards([]), edited: false },
+};
+let db = null, downloads = null, savedDates = [];
+let reports = {};
+let calYM = todayISO().slice(0, 7);
+let view = 'calendar', sub = 'tbm';
+
+const laborTotal = () => CATS.reduce((a, c) => a + (+S.labor[c] || 0), 0);
+const wd = (iso) => '일월화수목금토'[new Date(iso + 'T00:00:00').getDay()];
+const dParts = (iso) => { const [y, m, d] = iso.split('-'); return { y, m: String(+m), d: String(+d), dd: d }; };
+const lines = (t) => String(t || '').split('\n').map(x => x.replace(/\s+$/, '')).filter(x => x.trim());
+function tbmItems(text) {
+  const out = [];
+  for (const raw of lines(text)) {
+    const l = raw.trim();
+    if (/^[-·•]/.test(l) && out.length) {
+      const sub = l.replace(/^[-·•]\s*/, '');
+      const last = out[out.length - 1];
+      out[out.length - 1] = last.subs ? { ...last, subs: [...last.subs, sub] } : { text: last.text, subs: [sub] };
+    } else out.push({ text: l.replace(/^[-·•]\s*/, ''), subs: null });
+  }
+  return out.map(o => o.subs ? `${o.text} (${o.subs.join(', ')})` : o.text);
+}
+function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function pad(arr, n, fill) { const a = arr.slice(); while (a.length < n) a.push(fill); return a; }
+function withState(st, fn) { const old = S; S = st; try { return fn(); } finally { S = old; } }
+
+// ---------------- views (tabs) ----------------
+const VIEWS = ['calendar', 'ilbo', 'tbm', 'report'];
+function setView(v, push) {
+  if (!VIEWS.includes(v)) v = 'calendar';
+  view = v;
+  $$('.tabbar [role=tab]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+  VIEWS.forEach(k => { $('v-' + k).hidden = k !== v; });
+  if (push !== false) { try { history.replaceState(null, '', '#' + v); } catch (_) {} }
+  if (v === 'report') renderReport();
+  requestAnimationFrame(() => { fitAll(); $$('#hz textarea').forEach(autosize); });
+  window.scrollTo(0, 0);
+}
+$$('.tabbar [role=tab]').forEach(b => b.onclick = () => setView(b.dataset.view));
+document.addEventListener('click', (ev) => {
+  const g = ev.target.closest('[data-goto]'); if (g) setView(g.dataset.goto);
+  const p = ev.target.closest('.seg [data-pane]');
+  if (p) {
+    const sec = p.closest('.view'); sec.dataset.pane = p.dataset.pane;
+    sec.querySelectorAll('.seg [data-pane]').forEach(x => x.setAttribute('aria-selected', String(x === p)));
+    requestAnimationFrame(fitAll); window.scrollTo(0, 0);
+  }
+  const z = ev.target.closest('[data-zoom]');
+  if (z) { const box = $(z.dataset.zoom); box.classList.toggle('zoom'); z.textContent = box.classList.contains('zoom') ? '화면에 맞추기' : '원래 크기로'; fitAll(); }
+  const a = ev.target.closest('[data-act]');
+  if (a) { if (a.dataset.act === 'save') saveRecord(false); else offer(a.dataset.act); }
+});
+$$('.subtabs [data-sub]').forEach(b => b.onclick = () => {
+  sub = b.dataset.sub;
+  $$('.subtabs [data-sub]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+  renderPreview();
+});
+
+// ---------------- form <-> state ----------------
+function renderLabor() {
+  $('labor').innerHTML = CATS.map(c => `<label>${c}<input type="number" inputmode="numeric" min="0" id="lb-${c}" data-cat="${c}" value="${S.labor[c] || 0}"></label>`).join('');
+  updateLaborSum();
+}
+function updateLaborSum() {
+  const t = laborTotal();
+  $('laborSum').innerHTML = `계 ${t}명 · 전일 누계 <input type="number" inputmode="numeric" id="laborPrev" min="0" value="${S.laborPrev}" style="width:84px;display:inline-block;padding:4px 6px"> · <span id="laborCum">누계 ${(+S.laborPrev || 0) + t}명</span>`;
+}
+function renderEquip() {
+  $('equip').innerHTML = `<div class="hd"><span>장비명</span><span>규격</span><span>전일</span><span>금일</span><span style="text-align:right">누계</span><span></span></div>` +
+    S.equip.map((e, i) => `<div class="it">
+      <input id="eq-n-${i}" data-i="${i}" data-k="name" value="${esc(e.name)}" placeholder="장비명" aria-label="장비명">
+      <input id="eq-s-${i}" data-i="${i}" data-k="spec" value="${esc(e.spec)}" placeholder="규격" aria-label="규격">
+      <label class="nl"><small>전일</small><input id="eq-p-${i}" data-i="${i}" data-k="prev" type="number" inputmode="numeric" min="0" value="${e.prev}" aria-label="전일"></label>
+      <label class="nl"><small>금일</small><input id="eq-t-${i}" data-i="${i}" data-k="today" type="number" inputmode="numeric" min="0" value="${e.today}" aria-label="금일"></label>
+      <span class="cum"><small>누계</small> <b id="eq-c-${i}">${(+e.prev || 0) + (+e.today || 0)}</b></span>
+      <button type="button" class="x" data-del-eq="${i}" aria-label="장비 삭제">×</button></div>`).join('');
+}
+function renderMat() {
+  const ph = { name: '품명', spec: '규격', qty: '수량', use: '용도', note: '비고' };
+  $('mat').innerHTML = `<div class="hd"><span>품명</span><span>규격</span><span>수량</span><span>용도</span><span>비고</span><span></span></div>` +
+    S.materials.map((m, i) => `<div class="it">${['name', 'spec', 'qty', 'use', 'note'].map(k => `<input id="mt-${k}-${i}" data-i="${i}" data-k="${k}" value="${esc(m[k])}" placeholder="${ph[k]}" aria-label="${ph[k]}">`).join('')}
+      <button type="button" class="x" data-del-mt="${i}" aria-label="자재 삭제">×</button></div>`).join('');
+}
+function renderHazards() {
+  $('hz').innerHTML = S.tbm.hazards.map((h, i) => `<div class="h"><textarea id="hz-${i}" data-hz="${i}" rows="1" aria-label="전달 사항 ${i + 1}">${esc(h)}</textarea></div>`).join('');
+  requestAnimationFrame(() => $$('#hz textarea').forEach(autosize));
+  renderTags();
+}
+function renderTags() {
+  $('tags').innerHTML = detectKeys(S).map(k => `<span class="tag">${TAGN[k]}</span>`).join('') || '<span class="msg">작업일보 탭에 금일작업을 입력하면 공종을 찾아 위험요소를 채웁니다.</span>';
+  const ti = tbmItems(S.today);
+  $('tbmWork').textContent = ti.length ? `금일작업: ${ti.join(' / ')}` : '';
+}
+function autosize(t) { if (!t.offsetParent) return; t.style.height = 'auto'; t.style.height = Math.max(34, t.scrollHeight + 2) + 'px'; }
+
+function fillForm() {
+  $('date').value = S.date; $('weather').value = S.weather; $('pPlan').value = S.pPlan; $('pAct').value = S.pAct;
+  $('today').value = S.today; $('next').value = S.next; $('notes').value = S.notes;
+  $('tStart').value = S.tbm.start; $('tEnd').value = S.tbm.end; $('tPlace').value = S.tbm.place;
+  $('sName').value = site.name; $('sCo').value = site.co; $('sMgr').value = site.mgr;
+  $('siteLine').textContent = `${site.name} · ${site.co}`;
+  renderLabor(); renderEquip(); renderMat(); renderHazards(); renderPreview();
+  if (S.date.slice(0, 7) !== calYM) calYM = S.date.slice(0, 7);
+  renderCal(); renderEditing();
+  if (view === 'report') renderReport();
+}
+function maybeRegen() { if (!S.tbm.edited) { S.tbm.hazards = buildHazards(detectKeys(S)); renderHazards(); } else renderTags(); }
+
+const app = $('app');
+app.addEventListener('input', (ev) => {
+  const t = ev.target;
+  if (!t.closest('#formIlbo, #formTbm')) { if (t.closest('#formReport')) renderReport(); return; }
+  if (t.id === 'date') return;
+  if (['weather', 'pPlan', 'pAct', 'today', 'next', 'notes'].includes(t.id)) {
+    S[t.id] = t.value;
+    if (['today', 'weather'].includes(t.id)) maybeRegen();
+  } else if (t.dataset.cat) { S.labor[t.dataset.cat] = +t.value || 0; const keep = document.activeElement === t; updateLaborSum(); if (keep) t.focus(); maybeRegen(); }
+  else if (t.id === 'laborPrev') { S.laborPrev = +t.value || 0; $('laborCum').textContent = `누계 ${S.laborPrev + laborTotal()}명`; }
+  else if (t.id.startsWith('eq-')) {
+    const e = S.equip[+t.dataset.i]; const k = t.dataset.k;
+    e[k] = (k === 'prev' || k === 'today') ? (+t.value || 0) : t.value;
+    $('eq-c-' + t.dataset.i).textContent = (+e.prev || 0) + (+e.today || 0);
+    if (k === 'today' || k === 'name') maybeRegen();
+  } else if (t.id.startsWith('mt-')) { S.materials[+t.dataset.i][t.dataset.k] = t.value; }
+  else if (t.dataset.hz !== undefined) { S.tbm.hazards[+t.dataset.hz] = t.value; S.tbm.edited = true; autosize(t); }
+  else if (t.id === 'tStart') S.tbm.start = t.value;
+  else if (t.id === 'tEnd') S.tbm.end = t.value;
+  else if (t.id === 'tPlace') S.tbm.place = t.value;
+  else if (t.id === 'sName') { site.name = t.value; $('siteLine').textContent = `${site.name} · ${site.co}`; }
+  else if (t.id === 'sCo') { site.co = t.value; $('siteLine').textContent = `${site.name} · ${site.co}`; }
+  else if (t.id === 'sMgr') site.mgr = t.value;
+  schedulePreview(); saveDraft(); autoSave();
+});
+$$('form').forEach(f => f.addEventListener('submit', (e) => e.preventDefault()));
+app.addEventListener('click', (ev) => {
+  const t = ev.target.closest('[data-del-eq],[data-del-mt]'); if (!t) return;
+  if (t.dataset.delEq !== undefined) { S.equip.splice(+t.dataset.delEq, 1); renderEquip(); }
+  else { S.materials.splice(+t.dataset.delMt, 1); renderMat(); }
+  schedulePreview(); saveDraft();
+});
+let asT = 0; function autoSave() { clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }
+$('addEq').onclick = () => { S.equip.push({ name: '', spec: '', prev: 0, today: 0 }); renderEquip(); };
+$('addMt').onclick = () => { S.materials.push({ name: '', spec: '', qty: '', use: '', note: '' }); renderMat(); };
+$('regen').onclick = () => { S.tbm.edited = false; maybeRegen(); schedulePreview(); };
+$('date').addEventListener('change', () => openDate($('date').value));
+
+// ---------------- page HTML (preview + PDF) ----------------
+const sigRows = () => Math.max(16, laborTotal());
+const prog = () => (S.pPlan || S.pAct) ? `공정률 : 계획 ${esc(S.pPlan)}% / 실시 ${esc(S.pAct)}%${(+S.pPlan > 0 && S.pAct !== '') ? `, 계획대비 ${Math.round(+S.pAct / +S.pPlan * 100)}%` : ''}` : '';
+function pageHTML(kind) {
+  const P = dParts(S.date);
+  if (kind === 'wr') {
+    const tl = lines(S.today), nl = lines(S.next), n = Math.max(5, tl.length, nl.length);
+    const half = Math.max(4, Math.ceil(S.equip.length / 2));
+    const eqL = S.equip.slice(0, half), eqR = S.equip.slice(half);
+    const eqCell = (e) => e ? `<td>${esc(e.name)}</td><td>${esc(e.spec)}</td><td>${e.prev}</td><td>${e.today}</td><td>${(+e.prev || 0) + (+e.today || 0)}</td>` : '<td></td><td></td><td></td><td></td><td></td>';
+    const t = laborTotal();
+    return `<div class="t1">작업일보</div>
+    <table><colgroup><col style="width:13%"><col style="width:33%"><col style="width:9%"><col style="width:9%"><col style="width:5%"><col style="width:10.3%"><col style="width:10.3%"><col style="width:10.4%"></colgroup>
+      <tr><td class="f">현 장 명</td><td colspan="3"><b>${esc(site.name)}</b></td><td rowspan="3" class="f">결<br><br>재</td><td class="f">담 당</td><td class="f">공 사</td><td class="f">소 장</td></tr>
+      <tr><td class="f">공 사 명</td><td colspan="3"><b>${esc(site.name)}</b></td><td rowspan="2"></td><td rowspan="2" class="slash"></td><td rowspan="2"></td></tr>
+      <tr><td class="f">일 &nbsp; 자</td><td><b>${P.y}년 ${P.m}월 ${P.d}일 ${wd(S.date)}요일</b></td><td class="f">날씨</td><td>${esc(S.weather)}</td></tr>
+    </table>
+    <p class="r">${prog() || '&nbsp;'}</p>
+    <h4>1. 작업내용</h4>
+    <table><tr><th>금일작업(실행)</th><th>명일작업(계획)</th></tr>
+      ${pad(tl, n, '').map((x, i) => `<tr><td class="l">${esc(x.replace(/^-/, ' -'))}</td><td class="l">${esc((nl[i] || '').replace(/^-/, ' -'))}</td></tr>`).join('')}</table>
+    <h4>2. 장비투입현황</h4>
+    <table><colgroup><col style="width:12%"><col style="width:11%"><col style="width:6%"><col style="width:6%"><col style="width:6%"><col style="width:12%"><col style="width:11%"><col style="width:6%"><col style="width:6%"><col style="width:6%"></colgroup>
+      <tr>${'<th>장비명</th><th>규격</th><th>전일</th><th>금일</th><th>누계</th>'.repeat(2)}</tr>
+      ${Array.from({ length: Math.max(4, eqL.length) }, (_, i) => `<tr>${eqCell(eqL[i])}${eqCell(eqR[i])}</tr>`).join('')}</table>
+    <h4>3. 자재투입현황</h4>
+    <table><colgroup><col style="width:17%"><col style="width:17%"><col style="width:16%"><col style="width:33%"><col style="width:17%"></colgroup>
+      <tr><th>품 명</th><th>규 격</th><th>수 량</th><th>용 도</th><th>비 고</th></tr>
+      ${pad(S.materials, 5, null).map(m => m ? `<tr><td>${esc(m.name)}</td><td>${esc(m.spec)}</td><td>${esc(m.qty)}</td><td>${esc(m.use)}</td><td>${esc(m.note)}</td></tr>` : '<tr><td></td><td></td><td></td><td></td><td></td></tr>').join('')}</table>
+    <h4>4. 인력투입현황</h4>
+    <table><tr><th style="width:10%">구 분</th>${pad(CATS, 9, '').map(c => `<th>${c}</th>`).join('')}<th>계</th><th>전 일</th><th>금 일</th><th>누 계</th></tr>
+      <tr><td>주 간</td>${pad(CATS.map(c => S.labor[c] || 0), 9, '').map(v => `<td>${v}</td>`).join('')}<td>${t}</td><td>${S.laborPrev}</td><td>${t}</td><td>${(+S.laborPrev || 0) + t}</td></tr>
+      <tr><td>야 간</td>${'<td></td>'.repeat(9)}<td>0</td><td>0</td><td>0</td><td>0</td></tr></table>
+    <h4>5. 특기사항</h4>
+    <table>${pad(lines(S.notes), 3, '').map(x => `<tr><td class="l">${esc(x)}</td></tr>`).join('')}</table>
+    <div class="foot">소장 &nbsp; ${esc(site.mgr)} &nbsp; (서명)</div>`;
+  }
+  if (kind === 'tbm') {
+    const ti = tbmItems(S.today), ni = tbmItems(S.next), n = Math.max(5, ti.length, ni.length);
+    return `<div class="formhd"><span class="b5">서식 5</span><span class="bt">TBM 회의록</span></div>
+    <div class="t2">Tool Box Meeting 회의록</div>
+    <table><colgroup><col style="width:11%"><col style="width:39%"><col style="width:19%"><col style="width:31%"></colgroup>
+      <tr><td class="f">TBM 일시</td><td colspan="3" class="l">${P.y}년 &nbsp; ${P.m}월 &nbsp; ${P.dd}일 &nbsp;&nbsp; [ ${esc(S.tbm.start).replace(':', ' : ')} &nbsp;~&nbsp; ${esc(S.tbm.end).replace(':', ' : ')} ] &nbsp;&nbsp; ( 날씨 : ${esc(S.weather)} )</td></tr>
+      <tr><td class="f">도 급 사</td><td>${esc(site.co)}</td><td class="f">TBM 장소</td><td>${esc(S.tbm.place)}</td></tr>
+      <tr><td class="f">공 사 명</td><td colspan="3"><b>${esc(site.name)}</b></td></tr>
+      <tr><td colspan="4" class="l f">■ 작업 내용 및 T.B.M. 전달 내용</td></tr>
+      <tr><td colspan="2" class="l"><b>■ 금일 내용</b></td><td colspan="2" class="l blue"><b>■ 명일 내용</b></td></tr>
+      ${Array.from({ length: n }, (_, i) => `<tr><td colspan="2" class="l">${i + 1}. ${esc(ti[i] || '')}</td><td colspan="2" class="l blue">${i + 1}. ${esc(ni[i] || '')}</td></tr>`).join('')}
+      <tr><td colspan="4" class="l" style="font-size:11pt"><b>■ 금일 TBM 전달 사항 <span class="red">(위험요소 및 안전대책)</span></b></td></tr>
+    </table>
+    <table class="hzr" style="border-top:0">${S.tbm.hazards.map(x => `<tr><td>- ${esc(x)}</td></tr>`).join('')}</table>`;
+  }
+  return `<div class="t2">T.B.M 참석자 서명지</div>
+    <table class="sig"><colgroup><col style="width:7%"><col style="width:22%"><col style="width:17%"><col style="width:17%"><col style="width:18%"><col style="width:19%"></colgroup>
+      <tr><td colspan="6" class="l f"><b>■ 참석자 사진대지</b> <i style="color:#999">※ TBM에 참여하지 않은 근로자를 확인하여 참석 必</i></td></tr>
+      <tr><td colspan="3" style="height:68mm"></td><td colspan="3"></td></tr>
+      <tr><td colspan="6" class="l f"><b>■ 참석자 확인</b> <i style="color:#999">※ TBM에 참여하지 않은 근로자를 확인하여 참석 必</i></td></tr>
+      <tr><th>No.</th><th>소 속</th><th>직 급</th><th>성 명</th><th>서 명</th><th>비 고</th></tr>
+      ${Array.from({ length: sigRows() }, (_, i) => i === 0 ? `<tr><td><b>1</b></td><td>${esc(site.co)}</td><td>${esc(site.mgrTitle)}</td><td>${esc(site.mgr)}</td><td></td><td></td></tr>` : `<tr><td><b>${i + 1}</b></td><td></td><td></td><td></td><td></td><td></td></tr>`).join('')}
+    </table>`;
+}
+let pvTimer = 0;
+function schedulePreview() { clearTimeout(pvTimer); pvTimer = setTimeout(renderPreview, 120); }
+function renderPreview() {
+  $('paperWr').innerHTML = pageHTML('wr');
+  $('paperTbm').innerHTML = pageHTML(sub);
+  requestAnimationFrame(fitAll);
+}
+function fitBox(box) {
+  const paper = box.querySelector('.paper');
+  paper.style.transform = ''; paper.style.margin = ''; paper.style.marginBottom = '';
+  if (!box.offsetParent || box.classList.contains('zoom')) return;
+  const cs = getComputedStyle(box);
+  const avail = box.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), w = paper.offsetWidth;
+  if (avail < w) {
+    const k = avail / w;
+    paper.style.transform = `scale(${k})`; paper.style.margin = '0';
+    paper.style.marginBottom = `${-(paper.offsetHeight * (1 - k))}px`;
+  } else paper.style.margin = '0 auto';
+}
+function fitAll() { $$('.sheetbox').forEach(fitBox); }
+window.addEventListener('resize', () => { fitAll(); $$('#hz textarea').forEach(autosize); });
+
+// ---------------- calendar ----------------
+const recTotal = (r) => Object.values(r.labor || {}).reduce((a, b) => a + (+b || 0), 0);
+function renderEditing() {
+  const P = dParts(S.date); const saved = !!reports[S.date];
+  $('editing').innerHTML = `${P.m}월 ${P.d}일 (${wd(S.date)}) 일보 <span class="pill ${saved ? 'saved' : ''}">${saved ? '저장됨' : '새로 작성'}</span>`;
+}
+function renderCal() {
+  const [y, m] = calYM.split('-').map(Number);
+  $('calTitle').textContent = `${y}.${String(m).padStart(2, '0')}`;
+  const first = new Date(y, m - 1, 1).getDay();
+  const days = new Date(y, m, 0).getDate();
+  const today = todayISO();
+  let h = '';
+  for (let i = 0; i < first; i++) h += '<span class="day out" aria-hidden="true"></span>';
+  let cnt = 0, sum = 0, lastCum = null, lastDate = null;
+  for (let d = 1; d <= days; d++) {
+    const iso = `${calYM}-${String(d).padStart(2, '0')}`;
+    const r = reports[iso]; const dow = (first + d - 1) % 7;
+    const cls = ['day', r ? 'has' : 'empty', dow === 0 ? 'sun' : '', dow === 6 ? 'sat' : '', iso === S.date ? 'sel' : '', iso === today ? 'today' : ''].join(' ');
+    let body = '';
+    if (r) {
+      const t = recTotal(r); cnt++; sum += t;
+      if (!lastDate || iso > lastDate) { lastDate = iso; lastCum = (+r.laborPrev || 0) + t; }
+      body = `<span class="ppl">${t}<i>명</i></span><span class="job">${esc(tbmItems(r.today)[0] || '')}</span>`;
+    }
+    h += `<button type="button" class="${cls}" data-date="${iso}" aria-label="${m}월 ${d}일${r ? ' 저장됨' : ''}" aria-pressed="${iso === S.date}"><span class="dn">${d}${r ? `<span class="wx">${esc(r.weather || '')}</span>` : ''}</span>${body}</button>`;
+  }
+  $('calGrid').innerHTML = h;
+  $('calSum').innerHTML = cnt ? `작성 <b>${cnt}일</b> · 이달 인력 <b>${sum}명</b> · 누계 <b>${lastCum}명</b> (${+lastDate.slice(5, 7)}/${+lastDate.slice(8)} 기준)` : (db ? '이달 저장된 일보 없음' : '기록 저장소에 연결되면 저장된 날짜가 표시됩니다');
+}
+$('calGrid').addEventListener('click', async (ev) => {
+  const b = ev.target.closest('.day[data-date]'); if (!b) return;
+  await openDate(b.dataset.date);
+  setView('ilbo');
+});
+const shiftMonth = (k) => { const [y, m] = calYM.split('-').map(Number); const d = new Date(y, m - 1 + k, 1); calYM = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`; renderCal(); };
+$('calPrev').onclick = () => shiftMonth(-1);
+$('calNext').onclick = () => shiftMonth(1);
+$('calToday').onclick = () => { calYM = todayISO().slice(0, 7); openDate(todayISO()); };
+
+// ---------------- docx builders ----------------
+const D = () => window.docx;
+function makeKit() {
+  const { Paragraph, TextRun, TableCell, TableRow, WidthType, BorderStyle, ShadingType, VerticalAlign, HeightRule, AlignmentType } = D();
+  const FONT = '맑은 고딕';
+  const B = { style: BorderStyle.SINGLE, size: 4, color: '000000' };
+  const BORDERS = { top: B, bottom: B, left: B, right: B };
+  const t = (text, o = {}) => new TextRun({ text: String(text ?? ''), font: FONT, size: o.size || 18, bold: o.bold, color: o.color, italics: o.italics, underline: o.underline ? {} : undefined });
+  const p = (runs, o = {}) => new Paragraph({ alignment: o.align ?? AlignmentType.CENTER, spacing: { before: o.before || 0, after: o.after || 0 }, children: Array.isArray(runs) ? runs : [runs] });
+  const cell = (content, width, o = {}) => new TableCell({
+    width: { size: width, type: WidthType.DXA }, columnSpan: o.span, rowSpan: o.rowSpan, borders: BORDERS,
+    verticalAlign: VerticalAlign.CENTER, shading: o.fill ? { fill: o.fill, type: ShadingType.CLEAR, color: 'auto' } : undefined,
+    margins: { top: 30, bottom: 30, left: 80, right: 80 },
+    children: typeof content === 'string' || typeof content === 'number' ? String(content).split('\n').map(x => p(t(x, o), o)) : (Array.isArray(content) ? content : [content]),
+  });
+  const row = (cells, h = 360) => new TableRow({ height: { value: h, rule: HeightRule.ATLEAST }, cantSplit: true, children: cells });
+  return { FONT, t, p, cell, row, L: AlignmentType.LEFT, C: AlignmentType.CENTER, R: AlignmentType.RIGHT };
+}
+const W = 9906;
+const PAGE = { page: { size: { width: 11906, height: 16838 }, margin: { top: 850, bottom: 700, left: 1000, right: 1000, footer: 300 } } };
+const tableOf = (cols, rows) => new (D().Table)({ width: { size: cols.reduce((a, b) => a + b, 0), type: D().WidthType.DXA }, columnWidths: cols, rows });
+
+function workReportDoc() {
+  const K = makeKit(); const { t, p, cell, row, L, R } = K;
+  const P = dParts(S.date); const G = 'ECECEC';
+  const c1 = [1300, 3300, 900, 900, 500, 1000, 1000, 1006];
+  const head = tableOf(c1, [
+    row([cell('현 장 명', c1[0], { fill: G, bold: true }), cell(site.name, c1[1] + c1[2] + c1[3], { span: 3, bold: true }), cell('결\n\n재', c1[4], { rowSpan: 3, fill: G }), cell('담 당', c1[5], { fill: G }), cell('공 사', c1[6], { fill: G }), cell('소 장', c1[7], { fill: G })], 400),
+    row([cell('공 사 명', c1[0], { fill: G, bold: true }), cell(site.name, c1[1] + c1[2] + c1[3], { span: 3, bold: true }), cell('', c1[5], { rowSpan: 2 }), cell('', c1[6], { rowSpan: 2 }), cell('', c1[7], { rowSpan: 2 })], 400),
+    row([cell('일    자', c1[0], { fill: G, bold: true }), cell(`${P.y}년 ${P.m}월 ${P.d}일 ${wd(S.date)}요일`, c1[1], { bold: true }), cell('날씨', c1[2], { fill: G }), cell(S.weather, c1[3])], 400),
+  ]);
+  const H = (s) => p(t(s, { bold: true, size: 20 }), { align: L, before: 200, after: 60 });
+  const tl = lines(S.today), nl = lines(S.next), n = Math.max(5, tl.length, nl.length);
+  const c2 = [W / 2, W / 2];
+  const work = tableOf(c2, [row([cell('금일작업(실행)', c2[0], { fill: G, bold: true }), cell('명일작업(계획)', c2[1], { fill: G, bold: true })]),
+    ...Array.from({ length: n }, (_, i) => row([cell(tl[i] ? tl[i].replace(/^-/, ' -') : '', c2[0], { align: L }), cell(nl[i] ? nl[i].replace(/^-/, ' -') : '', c2[1], { align: L })], 340))]);
+  const c3 = [1250, 1100, 600, 600, 600, 1250, 1100, 600, 600, 606];
+  const half = Math.max(4, Math.ceil(S.equip.length / 2));
+  const eqL = S.equip.slice(0, half), eqR = S.equip.slice(half);
+  const ec = (e, off) => e ? [e.name, e.spec, e.prev, e.today, (+e.prev || 0) + (+e.today || 0)].map((v, j) => cell(String(v ?? ''), c3[off + j])) : [0, 1, 2, 3, 4].map(j => cell('', c3[off + j]));
+  const eq = tableOf(c3, [row(['장비명', '규격', '전일', '금일', '누계', '장비명', '규격', '전일', '금일', '누계'].map((s, j) => cell(s, c3[j], { fill: G, bold: true }))),
+    ...Array.from({ length: Math.max(4, eqL.length) }, (_, i) => row([...ec(eqL[i], 0), ...ec(eqR[i], 5)], 340))]);
+  const c4 = [1700, 1700, 1600, 3200, 1706];
+  const mt = tableOf(c4, [row(['품   명', '규   격', '수   량', '용   도', '비   고'].map((s, j) => cell(s, c4[j], { fill: G, bold: true }))),
+    ...pad(S.materials, 5, null).map(m => row((m ? [m.name, m.spec, m.qty, m.use, m.note] : ['', '', '', '', '']).map((v, j) => cell(v || '', c4[j])), 340))]);
+  const tot = laborTotal();
+  const c5 = [990, ...Array(9).fill(616), 700, 768, 700, 804];
+  const lab = tableOf(c5, [
+    row([cell('구   분', c5[0], { fill: G, bold: true }), ...pad(CATS, 9, '').map((c, j) => cell(c, c5[1 + j], { fill: G, size: 16 })), ...['계', '전 일', '금 일', '누 계'].map((s, j) => cell(s, c5[10 + j], { fill: G }))]),
+    row([cell('주   간', c5[0]), ...pad(CATS.map(c => S.labor[c] || 0), 9, '').map((v, j) => cell(String(v), c5[1 + j])), ...[tot, S.laborPrev, tot, (+S.laborPrev || 0) + tot].map((v, j) => cell(String(v), c5[10 + j]))]),
+    row([cell('야   간', c5[0]), ...Array(9).fill('').map((v, j) => cell('', c5[1 + j])), ...[0, 0, 0, 0].map((v, j) => cell(String(v), c5[10 + j]))]),
+  ]);
+  const notes = tableOf([W], pad(lines(S.notes), 3, '').map(x => row([cell(x, W, { align: L })], 340)));
+  return new (D().Document)({
+    styles: { default: { document: { run: { font: K.FONT, size: 18 } } } },
+    sections: [{ properties: PAGE, children: [
+      p(t('작   업   일   보', { size: 40, bold: true }), { after: 240 }), head,
+      p(t(prog().replace(/&amp;/g, '&'), { size: 17 }), { align: R, before: 60 }),
+      H('1. 작업내용'), work, H('2. 장비투입현황'), eq, H('3. 자재투입현황'), mt, H('4. 인력투입현황'), lab, H('5. 특기사항'), notes,
+      p(t(`소장          ${site.mgr}          (서명)`, { size: 20 }), { align: R, before: 400 }),
+    ] }],
+  });
+}
+function tbmDoc() {
+  const K = makeKit(); const { t, p, cell, row, L, C } = K;
+  const X = D(); const P = dParts(S.date);
+  const NB = { style: X.BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+  const NOB = { top: NB, bottom: NB, left: NB, right: NB };
+  const headBox = new X.Table({ width: { size: W, type: X.WidthType.DXA }, columnWidths: [1300, 200, W - 1500],
+    borders: { top: NB, bottom: NB, left: NB, right: NB, insideHorizontal: NB, insideVertical: NB },
+    rows: [new X.TableRow({ height: { value: 520, rule: X.HeightRule.ATLEAST }, children: [
+      new X.TableCell({ width: { size: 1300, type: X.WidthType.DXA }, verticalAlign: X.VerticalAlign.CENTER, borders: NOB, shading: { fill: '1F3864', type: X.ShadingType.CLEAR, color: 'auto' }, children: [p(t('서식 5', { size: 24, bold: true, color: 'FFFFFF' }))] }),
+      new X.TableCell({ width: { size: 200, type: X.WidthType.DXA }, borders: NOB, children: [p(t(''))] }),
+      cell([p(t('TBM 회의록', { size: 24, bold: true }), { align: L })], W - 1500),
+    ] })] });
+  const title = (s) => p(t(s, { size: 36, bold: true, underline: true }), { before: 160, after: 160 });
+  const c = [1100, 3850, 1900, 3056]; const LW = c[0] + c[1], RW = c[2] + c[3]; const G = 'F2F2F2';
+  const ti = tbmItems(S.today), ni = tbmItems(S.next), n = Math.max(5, ti.length, ni.length);
+  const rows = [
+    row([cell('TBM 일시', c[0], { fill: G, bold: true }), cell(`${P.y}년   ${P.m}월   ${P.dd}일          [ ${S.tbm.start.replace(':', ' : ')}   ~   ${S.tbm.end.replace(':', ' : ')} ]               ( 날씨 :  ${S.weather}  )`, c[1] + c[2] + c[3], { span: 3, align: L })], 420),
+    row([cell('도 급 사', c[0], { fill: G, bold: true }), cell(site.co, c[1]), cell('TBM 장소', c[2], { fill: G, bold: true }), cell(S.tbm.place, c[3])], 420),
+    row([cell('공 사 명', c[0], { fill: G, bold: true }), cell(site.name, c[1] + c[2] + c[3], { span: 3, bold: true })], 420),
+    row([cell('■ 작업 내용 및 T.B.M. 전달 내용', W, { span: 4, fill: G, bold: true, align: L })], 420),
+    row([cell('■ 금일 내용', LW, { span: 2, bold: true, align: L }), cell('■ 명일 내용', RW, { span: 2, bold: true, color: '0033CC', align: L })], 420),
+    ...Array.from({ length: n }, (_, i) => row([cell(`${i + 1}. ${ti[i] || ''}`, LW, { span: 2, align: L }), cell(`${i + 1}. ${ni[i] || ''}`, RW, { span: 2, align: L, color: '0033CC' })], 420)),
+    row([cell([p([t('■ 금일 TBM 전달 사항 ', { bold: true, size: 22 }), t('(위험요소 및 안전대책)', { bold: true, size: 22, color: 'FF0000' })], { align: L })], W, { span: 4 })], 520),
+    ...S.tbm.hazards.map(h => row([cell(`- ${h}`, W, { span: 4, align: L })], n > 5 ? 560 : 620)),
+  ];
+  const pc = [700, 2200, 1700, 1700, 1800, 1806];
+  const note = (s) => [p([t(`■ ${s} `, { bold: true }), t('※ TBM에 참여하지 않은 근로자를 확인하여 참석 必', { italics: true, color: '999999', size: 16 })], { align: L })];
+  const nSig = sigRows();
+  const sig = tableOf(pc, [
+    row([cell(note('참석자 사진대지'), W, { span: 6, fill: G })], 420),
+    row([cell('', pc[0] + pc[1] + pc[2], { span: 3 }), cell('', pc[3] + pc[4] + pc[5], { span: 3 })], nSig > 16 ? 3000 : 3800),
+    row([cell(note('참석자 확인'), W, { span: 6, fill: G })], 420),
+    row(['No.', '소 속', '직 급', '성 명', '서 명', '비 고'].map((s, i) => cell(s, pc[i], { bold: true })), 400),
+    ...Array.from({ length: nSig }, (_, i) => row((i === 0 ? ['1', site.co, site.mgrTitle, site.mgr, '', ''] : [String(i + 1), '', '', '', '', '']).map((s, j) => cell(s, pc[j], { bold: j === 0 })), nSig > 16 ? 380 : 430)),
+  ]);
+  return new X.Document({
+    styles: { default: { document: { run: { font: K.FONT, size: 18 } } } },
+    sections: [{ properties: PAGE,
+      footers: { default: new X.Footer({ children: [new X.Paragraph({ alignment: C, children: [new X.TextRun({ children: ['- ', X.PageNumber.CURRENT, ' -'], font: K.FONT, size: 18 })] })] }) },
+      children: [headBox, title('Tool Box Meeting 회의록'), tableOf(c, rows), new X.Paragraph({ children: [new X.PageBreak()] }), title('T.B.M 참석자 서명지'), sig] }],
+  });
+}
+
+// ---------------- saving & downloads ----------------
+const say = (s, err) => { const m = $('msg'); m.textContent = s; m.classList.toggle('err', !!err); };
+function record() {
+  return {
+    date: S.date, weather: S.weather, pPlan: S.pPlan, pAct: S.pAct, today: S.today, next: S.next, notes: S.notes,
+    labor: S.labor, laborPrev: +S.laborPrev || 0, laborCum: (+S.laborPrev || 0) + laborTotal(),
+    equip: S.equip.map(e => ({ name: e.name, spec: e.spec, prev: +e.prev || 0, today: +e.today || 0, cum: (+e.prev || 0) + (+e.today || 0) })),
+    materials: S.materials, tbm: S.tbm, savedAt: new Date().toISOString(),
+  };
+}
+async function saveRecord(quiet) {
+  if (!db) { if (!quiet) say('기록 저장소에 연결되지 않아 이 브라우저에만 임시 보관했습니다.', true); saveDraft(); return false; }
+  try {
+    const rec = record();
+    await db.doc('reports/' + S.date).set(rec);
+    await db.doc('config/site').set({ ...site });
+    reports[S.date] = rec; renderCal(); renderEditing();
+    if (!savedDates.includes(S.date)) { savedDates.push(S.date); savedDates.sort().reverse(); }
+    if (!quiet) say(`${S.date} 일보를 저장했습니다.`);
+    return true;
+  } catch (e) { say(`저장하지 못했습니다 (${e.code || e.message}). 권한이 있는지 확인해 주세요.`, true); return false; }
+}
+const stamp = (iso) => { const P = dParts(iso); return `${P.y}.${P.m.padStart(2, '0')}.${P.dd}`; };
+function downloadErr(e) {
+  const c = e && e.code;
+  say(c === 'declined' ? '내려받기를 취소했습니다.' : c === 'rate_limited' ? '다른 저장 확인창이 열려 있습니다. 잠시 후 다시 눌러 주세요.' : `파일을 만들지 못했습니다 (${c || (e && e.message)}).`, c !== 'declined');
+}
+async function offer(kind) {
+  if (!window.docx) { say('Word 변환 도구를 불러오지 못했습니다. 페이지를 새로 고쳐 주세요.', true); return; }
+  if (!downloads) { say('이 화면에서는 파일 내려받기를 쓸 수 없습니다.', true); return; }
+  const name = kind === 'wr' ? `작업일보_공릉천교_${stamp(S.date)}.docx` : `TBM회의록_공릉천교_${stamp(S.date)}.docx`;
+  try {
+    const blob = await D().Packer.toBlob(kind === 'wr' ? workReportDoc() : tbmDoc());
+    saveRecord(true);
+    await downloads.save({ filename: name, data: blob });
+    say(`${name} 을(를) 내려받았습니다. 기록도 저장했습니다.`);
+  } catch (e) { downloadErr(e); }
+}
+
+// ---------------- report (PDF) ----------------
+function recToState(r) {
+  const st = {
+    date: r.date, weather: r.weather || '맑음', pPlan: r.pPlan || '', pAct: r.pAct || '', today: r.today || '', next: r.next || '', notes: r.notes || '',
+    labor: { ...Object.fromEntries(CATS.map(c => [c, 0])), ...(r.labor || {}) }, laborPrev: r.laborPrev || 0,
+    equip: (r.equip || blankEq()).map(e => ({ name: e.name, spec: e.spec, prev: e.prev || 0, today: e.today || 0 })),
+    materials: r.materials || blankMt(),
+    tbm: r.tbm ? { ...r.tbm, hazards: (r.tbm.hazards || []).slice() } : { start: '09:00', end: '17:00', place: site.place, hazards: [], edited: false },
+  };
+  if (!st.tbm.hazards.length) st.tbm.hazards = buildHazards(detectKeys(st));
+  return st;
+}
+function reportDates() {
+  if ($('rOne').checked) return [S.date];
+  let a = $('rFrom').value, b = $('rTo').value; if (a && b && a > b) [a, b] = [b, a];
+  return Object.keys(reports).filter(d => (!a || d >= a) && (!b || d <= b)).sort();
+}
+const kinds = () => [['wr', 'incWr'], ['tbm', 'incTbm'], ['sig', 'incSig']].filter(([, id]) => $(id).checked).map(([k]) => k);
+function renderReport() {
+  $('rOneLabel').textContent = `선택한 날짜 (${dParts(S.date).m}/${dParts(S.date).d} ${wd(S.date)})`;
+  if (!$('rFrom').value) $('rFrom').value = S.date.slice(0, 8) + '01';
+  if (!$('rTo').value) $('rTo').value = S.date;
+  const ds = reportDates(), ks = kinds();
+  $('rChips').innerHTML = ds.length ? ds.map(d => `<span class="chip ${reports[d] ? '' : 'draft'}">${+d.slice(5, 7)}/${+d.slice(8)} ${wd(d)}</span>`).join('') : '<span class="msg">이 기간에 저장된 일보가 없습니다.</span>';
+  $('rCount').innerHTML = `일보 <b>${ds.length}일</b> × 문서 <b>${ks.length}종</b> = <b>${ds.length * ks.length}쪽</b>`;
+  $('mkPdf').disabled = !ds.length || !ks.length;
+}
+async function makePdf() {
+  if (!window.html2canvas || !window.jspdf) { say('PDF 도구를 불러오지 못했습니다. 페이지를 새로 고쳐 주세요.', true); return; }
+  if (!downloads) { say('이 화면에서는 파일 내려받기를 쓸 수 없습니다.', true); return; }
+  const ds = reportDates(), ks = kinds(); const total = ds.length * ks.length; if (!total) return;
+  const btn = $('mkPdf'); btn.disabled = true; $('prog').hidden = false;
+  const stage = $('pdfStage'); const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+  let n = 0;
+  try {
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    for (const d of ds) {
+      const st = d === S.date ? S : recToState(reports[d]);
+      for (const k of ks) {
+        stage.innerHTML = `<div class="paper">${withState(st, () => pageHTML(k))}</div>`;
+        const el = stage.firstChild;
+        const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+        const img = canvas.toDataURL('image/jpeg', 0.9);
+        let w = 210, h = canvas.height * 210 / canvas.width, x = 0;
+        if (h > 297) { w = 297 * canvas.width / canvas.height; h = 297; x = (210 - w) / 2; }
+        if (n) pdf.addPage();
+        pdf.addImage(img, 'JPEG', x, 0, w, h);
+        n++; $('progBar').style.width = `${Math.round(n / total * 100)}%`;
+        say(`PDF 만드는 중… ${n}/${total}쪽`);
+      }
+    }
+    stage.innerHTML = '';
+    const name = ds.length === 1 ? `공릉천교_보고서_${stamp(ds[0])}.pdf` : `공릉천교_보고서_${stamp(ds[0])}-${stamp(ds[ds.length - 1])}.pdf`;
+    if (ds.includes(S.date)) saveRecord(true);
+    await downloads.save({ filename: name, data: pdf.output('blob') });
+    say(`${name} (${total}쪽)을 내려받았습니다.`);
+  } catch (e) { downloadErr(e); }
+  finally { stage.innerHTML = ''; btn.disabled = false; setTimeout(() => { $('prog').hidden = true; $('progBar').style.width = '0'; }, 800); }
+}
+$('mkPdf').onclick = makePdf;
+['rOne', 'rRange', 'incWr', 'incTbm', 'incSig'].forEach(id => $(id).addEventListener('change', renderReport));
+['rFrom', 'rTo'].forEach(id => $(id).addEventListener('change', () => { $('rRange').checked = true; renderReport(); }));
+
+// ---------------- open a date ----------------
+function carryFrom(prev, date) {
+  S = {
+    date, weather: '맑음', pPlan: prev ? prev.pPlan || '' : '', pAct: prev ? prev.pAct || '' : '',
+    today: prev ? prev.next || '' : '', next: '', notes: prev ? prev.notes || '' : '',
+    labor: { ...Object.fromEntries(CATS.map(c => [c, 0])), ...(prev ? prev.labor : {}) },
+    laborPrev: prev ? (prev.laborCum ?? 0) : 0,
+    equip: prev ? prev.equip.map(e => ({ name: e.name, spec: e.spec, prev: e.cum ?? ((e.prev || 0) + (e.today || 0)), today: 0 })) : blankEq(),
+    materials: prev ? prev.materials.map(m => ({ ...m })) : blankMt(),
+    tbm: { start: prev?.tbm?.start || '09:00', end: prev?.tbm?.end || '17:00', place: prev?.tbm?.place || site.place, hazards: [], edited: false },
+  };
+  S.tbm.hazards = buildHazards(detectKeys(S));
+  try { const r = window.parent.RATE_AT && window.parent.RATE_AT(date); if (r != null) S.pAct = (r * 100).toFixed(2); } catch (e) {}
+}
+async function openDate(date) {
+  if (!date) return;
+  if (!db) { S.date = date; fillForm(); return; }
+  try {
+    if (reports[date]) { S = recToState(reports[date]); say(`${date} 저장된 일보를 불러왔습니다.`); }
+    else {
+      const prevDate = Object.keys(reports).filter(d => d < date).sort().pop();
+      const prev = prevDate ? reports[prevDate] : null;
+      carryFrom(prev, date);
+      say(prev ? `${prev.date} 일보의 명일작업·누계를 이어받아 새로 작성합니다.` : '앞선 기록이 없어 새로 작성합니다. 전일 값을 직접 넣어 주세요.');
+    }
+  } catch (e) { S.date = date; say(`기록을 읽지 못했습니다 (${e.code || e.message}).`, true); }
+  fillForm();
+}
+
+// ---------------- draft (per-browser convenience) ----------------
+let draftTimer = 0;
+function saveDraft() { clearTimeout(draftTimer); draftTimer = setTimeout(() => { try { localStorage.setItem('ilbo-draft', JSON.stringify({ S, site })); } catch (_) {} }, 400); }
+function loadDraft() { try { const d = JSON.parse(localStorage.getItem('ilbo-draft') || 'null'); if (d && d.S) { S = { ...S, ...d.S, tbm: { ...S.tbm, ...d.S.tbm } }; site = { ...site, ...d.site }; } } catch (_) {} }
+
+// ---------------- 통합 앱 연결 고리 ----------------
+window.ILBO = {
+  setView: (v) => setView(v, false),
+  async openDate(d) { if (asT) { clearTimeout(asT); asT = 0; await saveRecord(true); } if (d && d !== S.date) await openDate(d); },
+  date: () => S.date,
+  reports: () => reports,
+  saveNow: () => saveRecord(true),
+  async pageCanvas(date, kind) {
+    const st = date === S.date ? S : (reports[date] ? recToState(reports[date]) : null);
+    if (!st) return null;
+    const stage = $('pdfStage');
+    stage.innerHTML = `<div class="paper">${withState(st, () => pageHTML(kind))}</div>`;
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; return await window.html2canvas(stage.firstChild, { scale: 2, backgroundColor: '#ffffff', logging: false }); }
+    finally { stage.innerHTML = ''; }
+  },
+  async word(kind) { await offer(kind); },
+};
+
+// ---------------- boot ----------------
+loadDraft();
+fillForm();
+setView((location.hash || '').slice(1) || 'calendar', false);
+(async () => {
+  const use = window.claude && window.claude.use ? window.claude.use.bind(window.claude) : null;
+  if (!use) { $('dbDot').className = 'dot warn'; $('dbText').textContent = '기록 저장소 없음 · 미리보기만'; return; }
+  const [dbN, dlN] = await Promise.all([use('db').catch(() => null), use('downloads').catch(() => null)]);
+  db = dbN; downloads = dlN;
+  if (!downloads) { $$('[data-act=wr],[data-act=tbm],#mkPdf').forEach(b => { b.disabled = true; }); }
+  if (!db) { $('dbDot').className = 'dot warn'; $('dbText').textContent = '기록 저장소 연결 안 됨 · 이 브라우저에만 임시 보관'; return; }
+  $('dbDot').className = 'dot ok'; $('dbText').textContent = '기록 저장소 연결됨';
+  try {
+    const cfg = await db.doc('config/site').get();
+    if (cfg.exists) site = { ...DEF_SITE, ...cfg.data() };
+  } catch (e) { say(`현장 정보를 읽지 못했습니다 (${e.code || e.message}).`, true); }
+  let first = true;
+  db.collection('reports').onSnapshot(async (all) => {
+    reports = {};
+    all.docs.forEach(d => { const r = d.data(); if (r && r.date) reports[r.date] = r; });
+    savedDates = Object.keys(reports).sort().reverse();
+    if (first) { first = false; await openDate(window.START_DATE || todayISO()); }
+    renderCal(); renderEditing(); if (view === 'report') renderReport();
+    window.dispatchEvent(new Event('ilbo-reports'));
+  });
+})();
+})();
+</script>
+
+</body></html>
