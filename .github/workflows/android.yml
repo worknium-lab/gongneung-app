@@ -50,7 +50,7 @@ jobs:
         run: |
           chmod +x gradlew
           set -o pipefail
-          report() { grep -E "What went wrong|error:|ERROR|FAILURE|Exception|e: " -A4 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done; }
+          report() { { grep -A12 "What went wrong" build.log; grep -E "Caused by|password|Keystore|keystore" build.log; } | head -30 | while IFS= read -r l; do echo "::error::$l"; done; }
           trap 'report' ERR
           if [ -n "$KS_PATH" ]; then
             ./gradlew --no-daemon assembleRelease 2>&1 | tee build.log
