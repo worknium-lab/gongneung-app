@@ -34,7 +34,7 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
           if [ -n "$KS_B64" ]; then
-            echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/app.jks"
+            echo "$KS_B64" | tr -d " \r\n" | base64 -d > "$RUNNER_TEMP/app.jks"
             echo "KS_PATH=$RUNNER_TEMP/app.jks" >> "$GITHUB_ENV"
           else
             echo "::warning::ANDROID_KEYSTORE_B64 비밀값이 없어 임시(debug) 서명으로 만듭니다. 업데이트 설치가 막힐 수 있습니다."

@@ -22,9 +22,9 @@ android {
             def ks = System.getenv('KS_PATH')
             if (ks) {
                 storeFile file(ks)
-                storePassword System.getenv('KS_PASS')
+                storePassword System.getenv('KS_PASS')?.trim()
                 keyAlias System.getenv('KEY_ALIAS')
-                keyPassword System.getenv('KS_PASS')
+                keyPassword System.getenv('KS_PASS')?.trim()
             }
         }
     }
