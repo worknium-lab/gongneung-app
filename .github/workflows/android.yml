@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -49,11 +49,14 @@ jobs:
           VERSION_NAME: 1.0.${{ github.run_number }}
         run: |
           chmod +x gradlew
+          set -o pipefail
+          report() { grep -E "What went wrong|error:|ERROR|FAILURE|Exception|e: " -A4 build.log | head -40 | while IFS= read -r l; do echo "::error::$l"; done; }
+          trap 'report' ERR
           if [ -n "$KS_PATH" ]; then
-            ./gradlew --no-daemon assembleRelease
+            ./gradlew --no-daemon assembleRelease 2>&1 | tee build.log
             cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/gongneung-1.0.${{ github.run_number }}.apk"
           else
-            ./gradlew --no-daemon assembleDebug
+            ./gradlew --no-daemon assembleDebug 2>&1 | tee build.log
             cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/gongneung-1.0.${{ github.run_number }}.apk"
           fi
 
