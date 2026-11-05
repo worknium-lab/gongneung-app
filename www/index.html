@@ -117,6 +117,8 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
 .bar{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
 .g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.seg.s3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.card h2 small{font-size:12px;color:var(--muted);font-weight:400;margin-left:6px}
 
 /* ---------- 로그인 ---------- */
 #login{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
@@ -253,6 +255,27 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
           <button class="btn" id="rpTbm">TBM 회의록 Word</button>
         </div>
         <p class="note" id="rpMsg" role="status"></p>
+
+        <!-- 현장사진 한꺼번에 받기 (ZIP) -->
+        <div class="card" id="phDl" style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+          <h2>현장사진 한꺼번에 받기<small>ZIP 파일 하나로</small></h2>
+          <div class="seg s3" role="group" aria-label="사진 범위">
+            <button data-pr="day" aria-pressed="true">이 날짜</button>
+            <button data-pr="range" aria-pressed="false">기간</button>
+            <button data-pr="all" aria-pressed="false">전체</button>
+          </div>
+          <div class="range" id="prBox" hidden style="margin-top:0">
+            <input type="date" id="prFrom" aria-label="사진 시작일"><span class="note">~</span><input type="date" id="prTo" aria-label="사진 종료일">
+          </div>
+          <div class="seg" role="group" aria-label="폴더 나누기">
+            <button data-pf="day" aria-pressed="true">날짜 › 위치 폴더</button>
+            <button data-pf="loc" aria-pressed="false">위치 › 날짜 폴더</button>
+          </div>
+          <div class="sum" id="phSum"></div>
+          <div class="bar" id="phBar" hidden><i></i></div>
+          <button class="btn pri" id="phZip" style="height:54px;font-size:16px">사진 ZIP 받기</button>
+          <p class="note" id="phMsg" role="status">파일 이름은 「날짜_시각_위치_메모.jpg」입니다. 앱에 올릴 때 줄인 사본(긴 변 2048px)이 들어갑니다.</p>
+        </div>
       </div>
     </section>
   </main>
@@ -437,7 +460,77 @@ function renderReport() {
   $('rpMake').disabled = !n;
   const has = !!REPORTS[DATE];
   $('rpWr').disabled = $('rpTbm').disabled = !has;
+  renderPh();
 }
+
+/* ---------------- 현장사진 ZIP ---------------- */
+let PR = 'day', PF = 'day', phBusy = false;
+function phList() {
+  let l = PHOTOS.filter(p => p.day && (p.img || p.imgc));
+  if (PR === 'day') l = l.filter(p => p.day === DATE);
+  else if (PR === 'range') { const a = $('prFrom').value, b = $('prTo').value; l = l.filter(p => (!a || p.day >= a) && (!b || p.day <= b)); }
+  return l.sort((a, b) => (a.taken || 0) - (b.taken || 0));
+}
+function phRangeLbl(l) {
+  if (PR === 'day') return DATE;
+  if (!l.length) return '';
+  const a = l[0].day, b = l[l.length - 1].day; return a === b ? a : `${a}~${b}`;
+}
+function renderPh() {
+  if (phBusy) return;
+  const l = phList(), days = new Set(l.map(p => p.day)).size, locs = new Set(l.map(p => p.loc || '미분류')).size;
+  $('phSum').innerHTML = l.length ? `${PR === 'day' ? short(DATE) : esc(phRangeLbl(l))} · 사진 <b class="num">${l.length}</b>장 · ${days}일 · 위치 ${locs}곳` : (PR === 'day' ? `${short(DATE)}에 올린 사진이 없습니다` : '이 범위에 올린 사진이 없습니다');
+  $('phZip').disabled = !l.length;
+}
+document.querySelectorAll('[data-pr]').forEach(b => b.onclick = () => {
+  PR = b.dataset.pr; document.querySelectorAll('[data-pr]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  $('prBox').hidden = PR !== 'range';
+  if (PR === 'range') { if (!$('prFrom').value) $('prFrom').value = DATE.slice(0, 8) + '01'; if (!$('prTo').value) $('prTo').value = DATE; }
+  renderPh();
+});
+document.querySelectorAll('[data-pf]').forEach(b => b.onclick = () => { PF = b.dataset.pf; document.querySelectorAll('[data-pf]').forEach(x => x.setAttribute('aria-pressed', String(x === b))); renderPh(); });
+$('prFrom').addEventListener('change', renderPh); $('prTo').addEventListener('change', renderPh);
+const safeName = s => String(s || '').replace(/[\\/:*?"<>|\r\n\t]+/g, ' ').replace(/\s+/g, ' ').trim();
+async function photoBlob(p) {
+  if (p.img) return STORE.assets.blob(p.img);
+  if (p.imgc) {
+    const parts = await Promise.all(Array.from({ length: p.imgc }, (_, i) => STORE.db.doc(`photoimg/${p.id}_${i}`).get().then(d => (d.data() || {}).d || '')));
+    const u = parts.join(''); if (!u) return null;
+    return (await fetch(u)).blob();
+  }
+  return null;
+}
+$('phZip').onclick = async () => {
+  const l = phList(); if (!l.length || phBusy) return;
+  phBusy = true; const btn = $('phZip'), bar = $('phBar'), msg = $('phMsg');
+  btn.disabled = true; bar.hidden = false; bar.firstElementChild.style.width = '0';
+  try {
+    if (!window.JSZip) await new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'vendor/jszip.min.js'; s.onload = res; s.onerror = () => rej(new Error('ZIP 도구를 불러오지 못했습니다')); document.head.append(s); });
+    const zip = new window.JSZip(), used = new Set(); let ok = 0, miss = 0;
+    for (let i = 0; i < l.length; i++) {
+      const p = l[i]; msg.textContent = `사진 모으는 중 ${i + 1} / ${l.length}`; bar.firstElementChild.style.width = (i / l.length * 80) + '%';
+      let b = null; try { b = await photoBlob(p); } catch (e) {}
+      if (!b) { miss++; continue; }
+      const d = new Date(p.taken || Date.now()), hm = String(d.getHours()).padStart(2, '0') + String(d.getMinutes()).padStart(2, '0');
+      const loc = p.loc === 'ETC' ? '기타' : (p.loc || '미분류');
+      const dir = PF === 'day' ? `${p.day}/${loc}/` : `${loc}/${p.day}/`;
+      const memo = safeName(p.memo).slice(0, 30);
+      let base = `${p.day}_${hm}_${loc}${memo ? '_' + memo : ''}`, name = dir + base + '.jpg', n = 2;
+      while (used.has(name)) name = dir + `${base}_${n++}.jpg`;
+      used.add(name); zip.file(name, b, { date: d }); ok++;
+    }
+    if (!ok) throw new Error('받을 수 있는 사진이 없습니다. 인터넷 연결을 확인해 주세요.');
+    msg.textContent = 'ZIP 파일 만드는 중…';
+    const blob = await zip.generateAsync({ type: 'blob', compression: 'STORE' }, m => { bar.firstElementChild.style.width = (80 + m.percent * 0.2) + '%'; });
+    const fname = `공릉천교_현장사진_${phRangeLbl(l) || '전체'}.zip`;
+    await STORE.downloads.save({ filename: fname, data: blob });
+    bar.firstElementChild.style.width = '100%';
+    msg.textContent = `${fname} — 사진 ${ok}장${miss ? ` (${miss}장은 이 기기에 없고 서버에서도 받지 못해 뺐습니다. 인터넷 연결 후 다시 받아 주세요)` : ''}`;
+  } catch (e) {
+    msg.textContent = '사진을 받지 못했습니다: ' + (e && e.message || e);
+  }
+  phBusy = false; btn.disabled = false; setTimeout(() => { bar.hidden = true; }, 1500); renderPh();
+};
 async function photoPages(d) {
   const ps = photosOf(d), out = [];
   for (let i = 0; i < ps.length; i += 6) {
