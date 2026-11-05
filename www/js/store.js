@@ -12,6 +12,8 @@
     realtime: { params: { eventsPerSecond: 5 } },
   }) : null;
   const BUCKET = 'photos';
+  /* 파일 위치: 사진·도면 그림(p…) → photos/<id>.jpg,  제출서류 파일(f…) → files/<id> (PDF·엑셀·한글 등 아무 형식) */
+  const loc = id => String(id)[0] === 'f' ? ['files', String(id)] : [BUCKET, id + '.jpg'];
 
   /* ---------------- IndexedDB ---------------- */
   let idbP = null;
@@ -172,7 +174,8 @@
   const URLS = new Map();
   const assets = {
     async upload(blob, opt) {
-      const id = 'p' + Date.now().toString(36) + rid().slice(0, 10);
+      const file = !!(opt && opt.kind === 'file');
+      const id = (file ? 'f' : 'p') + Date.now().toString(36) + rid().slice(0, 10);
       const b = blob instanceof Blob ? blob : new Blob([blob], { type: (opt && opt.type) || 'image/jpeg' });
       await tx(['blobs', 'blobq'], 'readwrite', (bs, q) => { bs.put({ id, blob: b }); q.put({ id, op: 'up', ts: Date.now() }); });
       status(); kick();
@@ -190,7 +193,8 @@
       if (URLS.has(id)) return URLS.get(id);
       let r = await tx('blobs', 'readonly', s => req(s.get(id)));
       if (!r && sb && session && navigator.onLine) {
-        const { data, error } = await sb.storage.from(BUCKET).download(id + '.jpg');
+        const [bk, nm] = loc(id);
+        const { data, error } = await sb.storage.from(bk).download(nm);
         if (!error && data) { r = { id, blob: data }; await tx('blobs', 'readwrite', s => { s.put(r); }); }
       }
       if (!r) return '';
@@ -260,9 +264,11 @@
     for (const { j, r } of jobs) {
       try {
         if (j.op === 'up') {
-          if (r) { const { error } = await sb.storage.from(BUCKET).upload(j.id + '.jpg', r.blob, { contentType: 'image/jpeg', upsert: true }); if (error) throw error; }
+          const [bk, nm] = loc(j.id);
+          if (r) { const { error } = await sb.storage.from(bk).upload(nm, r.blob, { contentType: bk === BUCKET ? 'image/jpeg' : (r.blob.type || 'application/octet-stream'), upsert: true }); if (error) throw error; }
         } else {
-          const { error } = await sb.storage.from(BUCKET).remove([j.id + '.jpg']); if (error) throw error;
+          const [bk, nm] = loc(j.id);
+          const { error } = await sb.storage.from(bk).remove([nm]); if (error) throw error;
         }
         await tx('blobq', 'readwrite', s => { s.delete(j.id); });
         status();
@@ -277,12 +283,12 @@
      없는데 이 기기에 남아 있으면 다시 올릴 목록에 넣음 (예전 버전에서 올리다 끊긴 사진 복구) */
   let lastHeal = 0, healing = null;
   const HEAL = { at: 0, total: 0, onServer: 0, missing: 0, requeued: 0, notHere: 0, err: '' };
-  async function serverFiles() {
+  async function serverFiles(bk) {
     const have = new Set();
     for (let off = 0; ; off += 1000) {
-      const { data, error } = await sb.storage.from(BUCKET).list('', { limit: 1000, offset: off, sortBy: { column: 'name', order: 'asc' } });
+      const { data, error } = await sb.storage.from(bk).list('', { limit: 1000, offset: off, sortBy: { column: 'name', order: 'asc' } });
       if (error) throw error;
-      (data || []).forEach(o => have.add(o.name));
+      (data || []).forEach(o => have.add(bk + '/' + o.name));
       if (!data || data.length < 1000) break;
     }
     return have;
@@ -291,14 +297,16 @@
     if (!force && Date.now() - lastHeal < 180000) return;
     lastHeal = Date.now();
     try {
-      const have = await serverFiles();
       const refs = new Set();
       colMap('photos').forEach(p => { if (p && p.img) refs.add(p.img); if (p && p.th) refs.add(p.th); });
       colMap('dwg').forEach(d => { if (d && d.img) refs.add(d.img); if (d && d.th) refs.add(d.th); });
+      colMap('subm').forEach(d => { ((d && d.files) || []).forEach(f => f && f.id && refs.add(f.id)); });
+      const have = await serverFiles(BUCKET);
+      if ([...refs].some(id => id[0] === 'f')) (await serverFiles('files')).forEach(k => have.add(k));
       const inQ = new Set((await getAll('blobq')).map(j => j.id));
       let onServer = 0, missing = 0, requeued = 0, notHere = 0;
       for (const id of refs) {
-        if (have.has(id + '.jpg')) { onServer++; continue; }
+        if (have.has(loc(id).join('/'))) { onServer++; continue; }
         missing++;
         if (inQ.has(id)) { requeued++; continue; }
         const r = await tx('blobs', 'readonly', s => req(s.get(id)));

@@ -9,7 +9,7 @@ WWW = pathlib.Path(__file__).resolve().parent.parent / 'www'
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8787
 LOCK = threading.Lock()
 DOCS = {}      # (col,id) -> row
-FILES = {}     # name -> bytes
+FILES = {}     # 'bucket/name' -> (bytes, content-type)
 REV = [0]
 USER = {'id': '11111111-1111-1111-1111-111111111111', 'email': 'test@site.kr', 'aud': 'authenticated', 'role': 'authenticated'}
 
@@ -68,12 +68,12 @@ class H(SimpleHTTPRequestHandler):
             if 'limit' in q:
                 rows = rows[:int(q['limit'][0])]
             return self.js(rows)
-        m = re.match(r'/storage/v1/object/(?:authenticated/)?photos/(.+)', u.path)
+        m = re.match(r'/storage/v1/object/(?:authenticated/)?(\w+)/(.+)', u.path)
         if m:
-            b = FILES.get(urllib.parse.unquote(m.group(1)))
-            if b is None:
+            f = FILES.get(m.group(1) + '/' + urllib.parse.unquote(m.group(2)))
+            if f is None:
                 return self.js({'error': 'not found'}, 404)
-            self.send_response(200); self.cors(); self.send_header('Content-Type', 'image/jpeg'); self.end_headers(); self.wfile.write(b); return
+            self.send_response(200); self.cors(); self.send_header('Content-Type', f[1]); self.end_headers(); self.wfile.write(f[0]); return
         if u.path == '/__state':
             return self.js({'docs': {f'{c}/{i}': r for (c, i), r in DOCS.items()}, 'files': list(FILES)})
         return super().do_GET()
@@ -98,26 +98,37 @@ class H(SimpleHTTPRequestHandler):
                 REV[0] += 1
                 DOCS[(r['col'], r['id'])] = {'col': r['col'], 'id': r['id'], 'data': r.get('data'), 'deleted': False, 'rev': REV[0]}
             return self.js({'ok': 1})
-        if u.path == '/storage/v1/object/list/photos':
+        m = re.match(r'/storage/v1/object/list/(\w+)$', u.path)
+        if m:
             b = json.loads(self.body() or b'{}'); o = int(b.get('offset', 0)); n = int(b.get('limit', 100))
-            names = sorted(FILES)[o:o + n]
-            return self.js([{'name': k, 'id': k, 'metadata': {'size': len(FILES[k])}} for k in names])
+            pre = m.group(1) + '/'
+            names = sorted(k[len(pre):] for k in FILES if k.startswith(pre))[o:o + n]
+            return self.js([{'name': k, 'id': k, 'metadata': {}} for k in names])
         if u.path == '/__dropfile':
             FILES.pop(json.loads(self.body())['name'], None); return self.js({'ok': 1})
-        m = re.match(r'/storage/v1/object/photos/(.+)', u.path)
+        m = re.match(r'/storage/v1/object/(\w+)/(.+)', u.path)
         if m:
-            FILES[urllib.parse.unquote(m.group(1))] = self.body()
-            return self.js({'Key': 'photos/' + m.group(1)})
+            raw, ct = self.body(), self.headers.get('Content-Type', '')
+            if ct.startswith('multipart/form-data'):   # supabase-js 는 Blob 을 FormData 로 보냄
+                bd = ct.split('boundary=')[1].encode()
+                for part in raw.split(b'--' + bd):
+                    if b'filename=' in part:
+                        h, _, data = part.partition(b'\r\n\r\n')
+                        mt = re.search(rb'Content-Type: ([^\r\n]+)', h)
+                        raw, ct = data[:-2], (mt.group(1).decode() if mt else 'application/octet-stream')
+            FILES[m.group(1) + '/' + urllib.parse.unquote(m.group(2))] = (raw, ct)
+            return self.js({'Key': m.group(1) + '/' + m.group(2)})
         return self.js({'error': 'nf'}, 404)
 
     do_PUT = do_POST
 
     def do_DELETE(self):
         u = urllib.parse.urlparse(self.path)
-        if u.path.startswith('/storage/v1/object/photos'):
+        m = re.match(r'/storage/v1/object/(\w+)$', u.path)
+        if m:
             b = json.loads(self.body() or b'{}')
             for p in b.get('prefixes', []):
-                FILES.pop(p, None)
+                FILES.pop(m.group(1) + '/' + p, None)
             return self.js([])
         return self.js({}, 404)
 

@@ -250,7 +250,7 @@ async function upload(file) {
   let setId = null;
   try {
     if (!window.pdfjsLib) { await loadScript('vendor/pdf.min.js'); window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js'; }
-    const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    const pdf = await window.pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()), cMapUrl: new URL('vendor/cmaps/', location.href).href, cMapPacked: true, standardFontDataUrl: new URL('vendor/standard_fonts/', location.href).href }).promise;
     const n = pdf.numPages;
     const p1 = await pdf.getPage(1), v1 = p1.getViewport({ scale: 1 });
     const preset = n === GN_PRESET.length && v1.width > v1.height && Math.abs(v1.width / v1.height - 1.414) < 0.03 ? GN_PRESET : null;

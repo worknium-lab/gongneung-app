@@ -58,8 +58,8 @@ main{flex:1;min-height:0;position:relative}
 .lock{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:10px;white-space:nowrap}
 .lock svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
 
-nav.tabs{flex:none;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs button{appearance:none;border:0;border-top:3px solid transparent;background:none;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);padding:0}
+nav.tabs{flex:none;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs button{appearance:none;border:0;border-top:3px solid transparent;background:none;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);padding:0;white-space:nowrap;letter-spacing:-.03em}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--accent)}
 
@@ -226,6 +226,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <!-- 도면: 도면 모듈 (처음 열 때 불러옴) -->
     <iframe class="frame off" id="fDwg" title="도면"></iframe>
 
+    <!-- 제출서류: 제출서류 모듈 (처음 열 때 불러옴) -->
+    <iframe class="frame off" id="fSubm" title="제출서류"></iframe>
+
     <!-- 보고서 -->
     <section class="pane" id="p-report" hidden>
       <div class="wrap">
@@ -288,6 +291,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <button data-t="photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>현장사진</button>
     <button data-t="dwg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>도면</button>
     <button data-t="report"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="15" width="12" height="6"/></svg>보고서</button>
+    <button data-t="subm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/><path d="M8 13h8M8 16.5h5"/></svg>제출서류</button>
   </nav>
 </div>
 
@@ -326,7 +330,7 @@ let DATE = iso(new Date());
 let MONTH = DATE.slice(0, 7);
 let TAB = 'cal';
 let REPORTS = {}, PHOTOS = [];
-const fProg = $('fProg'), fIlbo = $('fIlbo'), fDwg = $('fDwg');
+const fProg = $('fProg'), fIlbo = $('fIlbo'), fDwg = $('fDwg'), fSubm = $('fSubm');
 const DW = () => fDwg.contentWindow;
 const PW = () => fProg.contentWindow, IW = () => fIlbo.contentWindow;
 window.START_DATE = DATE;
@@ -349,7 +353,9 @@ function setTab(t) {
   fDwg.classList.toggle('off', t !== 'dwg');
   if (t === 'dwg' && !fDwg.getAttribute('src')) fDwg.src = 'dwg.html';
   if (t !== 'dwg') window.DWG_FULL(false);
-  $('dateBar').hidden = t === 'cal' || t === 'prog' || t === 'dwg';
+  fSubm.classList.toggle('off', t !== 'subm');
+  if (t === 'subm' && !fSubm.getAttribute('src')) fSubm.src = 'subm.html';
+  $('dateBar').hidden = t === 'cal' || t === 'prog' || t === 'dwg' || t === 'subm';
   $('monthBar').hidden = t !== 'cal';
   try {
     if (t === 'prog') PW().show(PV);
@@ -655,6 +661,7 @@ $('loginForm').addEventListener('submit', async e => {
   A.addListener('backButton', () => {
     if (!$('sheet').hidden) { $('sheet').hidden = true; return; }
     try { if (TAB === 'dwg' && DW().DWG && DW().DWG.back()) return; } catch (e) {}
+    try { if (TAB === 'subm' && fSubm.contentWindow.SUBM && fSubm.contentWindow.SUBM.back()) return; } catch (e) {}
     try { const pb = PW().document.getElementById('pbox'); if (pb && !pb.hidden) { PW().document.getElementById('pbClose').click(); return; } } catch (e) {}
     if (TAB !== 'cal') setTab('cal'); else A.minimizeApp();
   });
