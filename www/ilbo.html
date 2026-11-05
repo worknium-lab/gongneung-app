@@ -71,8 +71,8 @@ input[type=number] { font-family: var(--font-num); text-align: right; }
 .mt .hd, .mt .it { grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,1.1fr) minmax(0,.8fr) 28px; }
 .mini input { padding: 5px 6px; font-size: 13px; }
 .cum { font-family: var(--font-num); text-align: right; font-size: 13px; color: var(--muted); }
-.labor { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 6px; }
-@media (max-width: 480px) { .labor { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+.labor { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 6px; }
+@media (max-width: 480px) { .labor { grid-template-columns: repeat(4, minmax(0,1fr)); } }
 .sum { font-size: 12px; color: var(--muted); font-family: var(--font-num); }
 button { font: inherit; cursor: pointer; border-radius: 4px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 7px 12px; }
 button.primary { background: var(--navy); color: var(--navy-ink); border-color: var(--navy); font-weight: 600; }
@@ -115,7 +115,8 @@ details summary { cursor: pointer; font-weight: 600; font-size: 13px; }
 .paper .formhd { display: flex; gap: 3mm; align-items: stretch; }
 .paper .formhd .b5 { background: #1f3864; color: #fff; font-weight: 700; padding: 1.5mm 4mm; font-size: 11pt; }
 .paper .formhd .bt { border: 1px solid #000; flex: 1; padding: 1.5mm 3mm; font-weight: 700; font-size: 11pt; }
-.paper .slash { background: linear-gradient(to top right, transparent calc(50% - .5px), #000 50%, transparent calc(50% + .5px)); }
+.paper .slash { position: relative; padding: 0; }
+.paper .slash img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
 .paper .foot { text-align: right; margin-top: 6mm; letter-spacing: .2em; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 
@@ -219,7 +220,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   button.ghost { min-height: 40px; }
   .panel { padding: 14px 12px; }
   .row { grid-template-columns: 1fr 1fr; }
-  .labor { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .labor { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .labor input { text-align: center; }
   #laborSum input { min-height: 36px; }
   /* equipment: name + spec on top line, numbers below */
@@ -323,9 +324,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <legend><span class="n">01</span> 일자 · 날씨</legend>
           <div class="row">
             <label>일자<input type="date" id="date"></label>
-            <label>날씨<select id="weather"><option>맑음</option><option>흐림</option><option>비</option><option>눈</option><option>강풍</option></select></label>
-            <label>공정률 계획(%)<input id="pPlan" inputmode="decimal" placeholder="20.91"></label>
-            <label>공정률 실시(%)<input id="pAct" inputmode="decimal" placeholder="20.91"></label>
+            <label>날씨<select id="weather"><option>맑음</option><option>구름</option><option>흐림</option><option>비</option><option>눈</option><option>강풍</option></select></label>
+            <label>공정률 계획(%) · 자동<input id="pPlan" inputmode="decimal" placeholder="20.91"></label>
+            <label>공정률 실시(%) · 자동<input id="pAct" inputmode="decimal" placeholder="20.91"></label>
           </div>
         </fieldset>
         <fieldset>
@@ -464,7 +465,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 (() => {
 'use strict';
 // ---------------- defaults ----------------
-const CATS = ['관리자', '반장', '작업원', '비계', '신호수', '인상'];
+const CATS = ['관리자', '반장', '작업원', '비계', '신호수', '인상', '깨기'];
 const DEF_SITE = { name: '2026년 파주 공릉천교 내진보강공사', co: '㈜에프엠이엔씨', mgr: '박종호', mgrTitle: '현장대리인', place: '공릉천교' };
 const DEF_EQ = [['굴착기', '0.6w'], ['크레인', '5ton'], ['싸인카', ''], ['스카이', '1.5ton']];
 const DEF_MT = [
@@ -579,7 +580,34 @@ function tbmItems(text) {
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function pad(arr, n, fill) { const a = arr.slice(); while (a.length < n) a.push(fill); return a; }
-function withState(st, fn) { const old = S; S = st; try { return fn(); } finally { S = old; } }
+/* 결재란 사선 (담당·공사): 왼쪽 아래 → 오른쪽 위 */
+const SLASH = `<img alt="" src="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><line x1="0" y1="100" x2="100" y2="0" stroke="#000" stroke-width="1.2" vector-effect="non-scaling-stroke"/></svg>')}">`;
+/* PDF 그림(html2canvas)은 SVG 그림을 못 그려서, 그릴 때만 사선을 얇은 선(회전한 테두리)으로 바꿔 넣음 */
+(function () {
+  const h2c = window.html2canvas; if (!h2c || h2c.__slash) return;
+  const wrapped = (el, opt) => { opt = opt || {}; const user = opt.onclone;
+    return h2c(el, { ...opt, onclone: (doc, cel) => {
+      doc.querySelectorAll('.slash').forEach(td => {
+        const w = td.offsetWidth, h = td.offsetHeight; if (!w || !h) return;
+        td.innerHTML = ''; const d = doc.createElement('div');
+        d.style.cssText = `position:absolute;left:0;top:${h}px;width:${Math.hypot(w, h)}px;height:0;border-top:1px solid #000;transform-origin:0 0;transform:rotate(${-Math.atan2(h, w) * 180 / Math.PI}deg)`;
+        td.append(d);
+      });
+      if (user) return user(doc, cel);
+    } }); };
+  wrapped.__slash = true; window.html2canvas = wrapped;
+})();
+/* 공정률 자동 입력: 공정률 탭의 그날 마감 공정률을 계획·실시에 넣음. 직접 고친 날(pManual)은 그대로, 칸을 비우면 다시 자동 */
+function rateOf(date) { try { const r = window.parent !== window && window.parent.RATE_AT && window.parent.RATE_AT(date); return r == null || r === false ? null : (r * 100).toFixed(2); } catch (e) { return null; } }
+function autoRate(st) { if (!st || st.pManual) return st; const v = rateOf(st.date); if (v != null) { st.pAct = v; st.pPlan = v; } return st; }
+setInterval(() => {
+  if (!S || S.pManual || document.hidden) return;
+  const v = rateOf(S.date); if (v == null || (v === S.pAct && v === S.pPlan)) return;
+  S.pAct = v; S.pPlan = v; const a = document.getElementById('pAct'), b = document.getElementById('pPlan');
+  if (a && document.activeElement !== a) a.value = v; if (b && document.activeElement !== b) b.value = v;
+  if (typeof schedulePreview === 'function') schedulePreview();
+}, 4000);
+function withState(st, fn) { const old = S; S = autoRate({ ...st }); try { return fn(); } finally { S = old; } }
 
 // ---------------- views (tabs) ----------------
 const VIEWS = ['calendar', 'ilbo', 'tbm', 'report'];
@@ -670,6 +698,7 @@ app.addEventListener('input', (ev) => {
   if (t.id === 'date') return;
   if (['weather', 'pPlan', 'pAct', 'today', 'next', 'notes'].includes(t.id)) {
     S[t.id] = t.value;
+    if (t.id === 'pAct' || t.id === 'pPlan') { S.pManual = t.value.trim() !== ''; if (!S.pManual) { autoRate(S); $('pAct').value = S.pAct; $('pPlan').value = S.pPlan; } }
     if (['today', 'weather'].includes(t.id)) maybeRegen();
   } else if (t.dataset.cat) { S.labor[t.dataset.cat] = +t.value || 0; const keep = document.activeElement === t; updateLaborSum(); if (keep) t.focus(); maybeRegen(); }
   else if (t.id === 'laborPrev') { S.laborPrev = +t.value || 0; $('laborCum').textContent = `누계 ${S.laborPrev + laborTotal()}명`; }
@@ -715,7 +744,7 @@ function pageHTML(kind) {
     return `<div class="t1">작업일보</div>
     <table><colgroup><col style="width:13%"><col style="width:33%"><col style="width:9%"><col style="width:9%"><col style="width:5%"><col style="width:10.3%"><col style="width:10.3%"><col style="width:10.4%"></colgroup>
       <tr><td class="f">현 장 명</td><td colspan="3"><b>${esc(site.name)}</b></td><td rowspan="3" class="f">결<br><br>재</td><td class="f">담 당</td><td class="f">공 사</td><td class="f">소 장</td></tr>
-      <tr><td class="f">공 사 명</td><td colspan="3"><b>${esc(site.name)}</b></td><td rowspan="2"></td><td rowspan="2" class="slash"></td><td rowspan="2"></td></tr>
+      <tr><td class="f">공 사 명</td><td colspan="3"><b>${esc(site.name)}</b></td><td rowspan="2" class="slash">${SLASH}</td><td rowspan="2" class="slash">${SLASH}</td><td rowspan="2"></td></tr>
       <tr><td class="f">일 &nbsp; 자</td><td><b>${P.y}년 ${P.m}월 ${P.d}일 ${wd(S.date)}요일</b></td><td class="f">날씨</td><td>${esc(S.weather)}</td></tr>
     </table>
     <p class="r">${prog() || '&nbsp;'}</p>
@@ -934,7 +963,7 @@ function tbmDoc() {
 const say = (s, err) => { const m = $('msg'); m.textContent = s; m.classList.toggle('err', !!err); };
 function record() {
   return {
-    date: S.date, weather: S.weather, pPlan: S.pPlan, pAct: S.pAct, today: S.today, next: S.next, notes: S.notes,
+    date: S.date, weather: S.weather, pPlan: S.pPlan, pAct: S.pAct, pManual: !!S.pManual, today: S.today, next: S.next, notes: S.notes,
     labor: S.labor, laborPrev: +S.laborPrev || 0, laborCum: (+S.laborPrev || 0) + laborTotal(),
     equip: S.equip.map(e => ({ name: e.name, spec: e.spec, prev: +e.prev || 0, today: +e.today || 0, cum: (+e.prev || 0) + (+e.today || 0) })),
     materials: S.materials, tbm: S.tbm, savedAt: new Date().toISOString(),
@@ -972,7 +1001,7 @@ async function offer(kind) {
 // ---------------- report (PDF) ----------------
 function recToState(r) {
   const st = {
-    date: r.date, weather: r.weather || '맑음', pPlan: r.pPlan || '', pAct: r.pAct || '', today: r.today || '', next: r.next || '', notes: r.notes || '',
+    date: r.date, weather: r.weather || '맑음', pPlan: r.pPlan || '', pAct: r.pAct || '', pManual: !!r.pManual, today: r.today || '', next: r.next || '', notes: r.notes || '',
     labor: { ...Object.fromEntries(CATS.map(c => [c, 0])), ...(r.labor || {}) }, laborPrev: r.laborPrev || 0,
     equip: (r.equip || blankEq()).map(e => ({ name: e.name, spec: e.spec, prev: e.prev || 0, today: e.today || 0 })),
     materials: r.materials || blankMt(),
@@ -1059,6 +1088,7 @@ async function openDate(date) {
       say(prev ? `${prev.date} 일보의 명일작업·누계를 이어받아 새로 작성합니다.` : '앞선 기록이 없어 새로 작성합니다. 전일 값을 직접 넣어 주세요.');
     }
   } catch (e) { S.date = date; say(`기록을 읽지 못했습니다 (${e.code || e.message}).`, true); }
+  autoRate(S);
   fillForm();
 }
 

@@ -49,7 +49,13 @@ s = rep(s, "  if (p.img) return '/_blob/' + p.img;", "  if (p.img) return (await
 s = rep(s, "const thSrc = p => p.th ? '/_blob/' + p.th : (p.thd || '');",
         """const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', THU = {}, THW = {};
 let thT = 0;
-function thLoad(id) { if (THW[id] || !assets) return; THW[id] = 1; assets.url(id).then(u => { if (u) { THU[id] = u; clearTimeout(thT); thT = setTimeout(R, 60); } }).catch(() => {}); }
+/* 아직 서버에 없거나 받기에 실패한 사진은 잠시 뒤 다시 받음 (다른 기기가 올리는 중일 수 있음) */
+function thLoad(id) {
+  if (!assets || (THW[id] && THW[id] > Date.now())) return;
+  THW[id] = Date.now() + 15000;
+  assets.url(id).then(u => { if (u) { THU[id] = u; THW[id] = Infinity; clearTimeout(thT); thT = setTimeout(R, 60); } }).catch(() => {});
+}
+setInterval(() => { if (window.__view === 'photos' && Object.keys(THW).some(k => !THU[k] && THW[k] <= Date.now())) R(); }, 16000);
 const thSrc = p => p.th ? (THU[p.th] || (thLoad(p.th), BLANK)) : (p.thd || '');""")
 # 통합 앱 연결 고리: 사진 날짜 지정
 s = rep(s, "/* ---------- 연결 ---------- */\n(async () => {\n  if (!window.claude || !claude.use) { R(); return; }",

@@ -248,17 +248,30 @@
       })));
     }
   }
+  /* 사진·도면 파일 올리기: 작은 파일(목록용 썸네일)부터, 한 장이 실패해도 나머지는 계속 */
   async function pushFiles() {
     const q = await getAll('blobq');
-    for (const j of q) {
-      if (j.op === 'up') {
-        const r = await tx('blobs', 'readonly', s => req(s.get(j.id)));
-        if (r) { const { error } = await sb.storage.from(BUCKET).upload(j.id + '.jpg', r.blob, { contentType: 'image/jpeg', upsert: true }); if (error) throw error; }
-      } else {
-        const { error } = await sb.storage.from(BUCKET).remove([j.id + '.jpg']); if (error) throw error;
+    const jobs = await Promise.all(q.map(async j => {
+      const r = j.op === 'up' ? await tx('blobs', 'readonly', s => req(s.get(j.id))) : null;
+      return { j, r, size: r && r.blob ? r.blob.size : 0 };
+    }));
+    jobs.sort((a, b) => (a.j.op === 'del' ? -1 : 0) - (b.j.op === 'del' ? -1 : 0) || a.size - b.size || a.j.ts - b.j.ts);
+    let firstErr = null;
+    for (const { j, r } of jobs) {
+      try {
+        if (j.op === 'up') {
+          if (r) { const { error } = await sb.storage.from(BUCKET).upload(j.id + '.jpg', r.blob, { contentType: 'image/jpeg', upsert: true }); if (error) throw error; }
+        } else {
+          const { error } = await sb.storage.from(BUCKET).remove([j.id + '.jpg']); if (error) throw error;
+        }
+        await tx('blobq', 'readwrite', s => { s.delete(j.id); });
+        status();
+      } catch (e) {
+        if (!firstErr) firstErr = e;
+        if (!navigator.onLine) break;
       }
-      await tx('blobq', 'readwrite', s => { s.delete(j.id); });
     }
+    if (firstErr) throw firstErr;
   }
   async function pull() {
     let rev = (await metaGet('rev')) || 0;
