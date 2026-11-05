@@ -58,7 +58,7 @@ main{flex:1;min-height:0;position:relative}
 .lock{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:10px;white-space:nowrap}
 .lock svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
 
-nav.tabs{flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs{flex:none;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 nav.tabs button{appearance:none;border:0;border-top:3px solid transparent;background:none;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);padding:0}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--accent)}
@@ -221,6 +221,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <!-- 작업일보 + TBM: 일보 모듈 -->
     <iframe class="frame off" id="fIlbo" title="작업일보·TBM"></iframe>
 
+    <!-- 도면: 도면 모듈 (처음 열 때 불러옴) -->
+    <iframe class="frame off" id="fDwg" title="도면"></iframe>
+
     <!-- 보고서 -->
     <section class="pane" id="p-report" hidden>
       <div class="wrap">
@@ -260,6 +263,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <button data-t="ilbo"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM8 11h8M8 15h8M8 18h5"/></svg>작업일보</button>
     <button data-t="tbm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 14a8 8 0 0 1 16 0v2H4z"/><path d="M12 6V4M2 18h20"/></svg>TBM</button>
     <button data-t="photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>현장사진</button>
+    <button data-t="dwg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>도면</button>
     <button data-t="report"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="15" width="12" height="6"/></svg>보고서</button>
   </nav>
 </div>
@@ -298,10 +302,14 @@ let DATE = iso(new Date());
 let MONTH = DATE.slice(0, 7);
 let TAB = 'cal';
 let REPORTS = {}, PHOTOS = [];
-const fProg = $('fProg'), fIlbo = $('fIlbo');
+const fProg = $('fProg'), fIlbo = $('fIlbo'), fDwg = $('fDwg');
+const DW = () => fDwg.contentWindow;
 const PW = () => fProg.contentWindow, IW = () => fIlbo.contentWindow;
 window.START_DATE = DATE;
 window.RATE_AT = day => { try { const rp = PW() && PW().RP; return rp && rp.ready() ? rp.rateAt(day) : null; } catch (e) { return null; } };
+
+/* 도면 전체 화면: 위 머리말과 아래 탭을 잠시 숨김 */
+window.DWG_FULL = on => { document.querySelector('header.top').hidden = !!on; $('tabs').hidden = !!on; };
 
 /* ---------------- 탭 ---------------- */
 function setTab(t) {
@@ -314,7 +322,10 @@ function setTab(t) {
   $('progWrap').style.pointerEvents = progOn ? '' : 'none';
   $('progSub').hidden = t !== 'prog';
   fIlbo.classList.toggle('off', !(t === 'ilbo' || t === 'tbm'));
-  $('dateBar').hidden = t === 'cal' || t === 'prog';
+  fDwg.classList.toggle('off', t !== 'dwg');
+  if (t === 'dwg' && !fDwg.getAttribute('src')) fDwg.src = 'dwg.html';
+  if (t !== 'dwg') window.DWG_FULL(false);
+  $('dateBar').hidden = t === 'cal' || t === 'prog' || t === 'dwg';
   $('monthBar').hidden = t !== 'cal';
   try {
     if (t === 'prog') PW().show(PV);
@@ -545,6 +556,7 @@ $('loginForm').addEventListener('submit', async e => {
   const A = C.Plugins.App; if (!A) return;
   A.addListener('backButton', () => {
     if (!$('sheet').hidden) { $('sheet').hidden = true; return; }
+    try { if (TAB === 'dwg' && DW().DWG && DW().DWG.back()) return; } catch (e) {}
     try { const pb = PW().document.getElementById('pbox'); if (pb && !pb.hidden) { PW().document.getElementById('pbClose').click(); return; } } catch (e) {}
     if (TAB !== 'cal') setTab('cal'); else A.minimizeApp();
   });
