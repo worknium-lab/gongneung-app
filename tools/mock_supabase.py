@@ -98,6 +98,12 @@ class H(SimpleHTTPRequestHandler):
                 REV[0] += 1
                 DOCS[(r['col'], r['id'])] = {'col': r['col'], 'id': r['id'], 'data': r.get('data'), 'deleted': False, 'rev': REV[0]}
             return self.js({'ok': 1})
+        if u.path == '/storage/v1/object/list/photos':
+            b = json.loads(self.body() or b'{}'); o = int(b.get('offset', 0)); n = int(b.get('limit', 100))
+            names = sorted(FILES)[o:o + n]
+            return self.js([{'name': k, 'id': k, 'metadata': {'size': len(FILES[k])}} for k in names])
+        if u.path == '/__dropfile':
+            FILES.pop(json.loads(self.body())['name'], None); return self.js({'ok': 1})
         m = re.match(r'/storage/v1/object/photos/(.+)', u.path)
         if m:
             FILES[urllib.parse.unquote(m.group(1))] = self.body()

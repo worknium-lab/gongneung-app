@@ -297,6 +297,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <dl>
       <dt>상태</dt><dd id="shState"></dd>
       <dt>마지막 동기화</dt><dd id="shLast"></dd>
+      <dt>사진 파일</dt><dd id="shFiles"></dd>
       <dt>계정</dt><dd id="shEmail"></dd>
     </dl>
     <div class="name"><input id="shName" placeholder="기록에 표시할 이름" aria-label="기록에 표시할 이름"><button class="btn" id="shNameSave">이름 저장</button></div>
@@ -593,12 +594,16 @@ function fillSheet() {
   const s = SST;
   $('shState').textContent = !s.online ? `오프라인 · 기기에 저장됨${s.pending ? ` (보낼 것 ${s.pending}건)` : ''}` : s.lastErr ? '오류: ' + s.lastErr : s.pending ? `보낼 것 ${s.pending}건${s.files ? ` (사진 ${s.files}장)` : ''}` : '모두 서버와 같음';
   $('shLast').textContent = fmtAgo(s.lastOk);
+  const h = s.heal || {};
+  $('shFiles').textContent = !h.at ? '점검 전' : h.err ? '점검 실패: ' + h.err
+    : !h.missing ? `서버에 모두 있음 (${h.onServer}개)`
+    : `서버에 없음 ${h.missing}개` + (h.requeued ? ` · 이 기기에 있어 다시 올림 (남은 것 ${s.files || 0}개)` : '') + (h.notHere ? ` · 다른 기기에만 있음 ${h.notHere}개 (그 기기에서 앱을 열어 두세요)` : '');
   $('shEmail').textContent = s.email || '-';
 }
 $('syncBtn').onclick = () => { $('shName').value = STORE.myName(); fillSheet(); $('sheet').hidden = false; };
 $('shClose').onclick = () => $('sheet').hidden = true;
 $('sheet').addEventListener('click', e => { if (e.target.id === 'sheet') $('sheet').hidden = true; });
-$('shSync').onclick = () => { STORE.syncNow(); toast('동기화를 시작했습니다'); };
+$('shSync').onclick = () => { STORE.checkFiles(); toast('동기화와 사진 파일 점검을 시작했습니다'); };
 $('shNameSave').onclick = async () => { await STORE.setName($('shName').value.trim()); toast('이름을 저장했습니다'); };
 $('shOut').onclick = async () => {
   try { await STORE.signOut(); location.reload(); } catch (e) { toast(e.message); }

@@ -229,7 +229,7 @@
   }
   async function status() {
     const c = await counts().catch(() => ({ docs: PENDING.size, files: 0 }));
-    const s = { ready: READY, online: navigator.onLine, signedIn: !!session, pending: c.docs + c.files, files: c.files, syncing, lastOk, lastErr, email: localStorage.getItem('gn-email') || '' };
+    const s = { ready: READY, online: navigator.onLine, signedIn: !!session, pending: c.docs + c.files, files: c.files, syncing, lastOk, lastErr, heal: Object.assign({}, HEAL), email: localStorage.getItem('gn-email') || '' };
     ST.forEach(f => f(s));
     return s;
   }
@@ -272,6 +272,41 @@
       }
     }
     if (firstErr) throw firstErr;
+  }
+  /* 사진 파일 점검: 기록에 있는 사진 파일이 서버에 정말 있는지 확인하고,
+     없는데 이 기기에 남아 있으면 다시 올릴 목록에 넣음 (예전 버전에서 올리다 끊긴 사진 복구) */
+  let lastHeal = 0, healing = null;
+  const HEAL = { at: 0, total: 0, onServer: 0, missing: 0, requeued: 0, notHere: 0, err: '' };
+  async function serverFiles() {
+    const have = new Set();
+    for (let off = 0; ; off += 1000) {
+      const { data, error } = await sb.storage.from(BUCKET).list('', { limit: 1000, offset: off, sortBy: { column: 'name', order: 'asc' } });
+      if (error) throw error;
+      (data || []).forEach(o => have.add(o.name));
+      if (!data || data.length < 1000) break;
+    }
+    return have;
+  }
+  async function healFiles(force) {
+    if (!force && Date.now() - lastHeal < 180000) return;
+    lastHeal = Date.now();
+    try {
+      const have = await serverFiles();
+      const refs = new Set();
+      colMap('photos').forEach(p => { if (p && p.img) refs.add(p.img); if (p && p.th) refs.add(p.th); });
+      colMap('dwg').forEach(d => { if (d && d.img) refs.add(d.img); if (d && d.th) refs.add(d.th); });
+      const inQ = new Set((await getAll('blobq')).map(j => j.id));
+      let onServer = 0, missing = 0, requeued = 0, notHere = 0;
+      for (const id of refs) {
+        if (have.has(id + '.jpg')) { onServer++; continue; }
+        missing++;
+        if (inQ.has(id)) { requeued++; continue; }
+        const r = await tx('blobs', 'readonly', s => req(s.get(id)));
+        if (r && r.blob) { await tx('blobq', 'readwrite', s => { s.put({ id, op: 'up', ts: Date.now() }); }); requeued++; }
+        else notHere++;
+      }
+      Object.assign(HEAL, { at: Date.now(), total: refs.size, onServer, missing, requeued, notHere, err: '' });
+    } catch (e) { HEAL.err = (e && e.message) || String(e); HEAL.at = Date.now(); }
   }
   async function pull() {
     let rev = (await metaGet('rev')) || 0;
@@ -317,7 +352,9 @@
       await pull();
       await seedOnce();
       await pushDocs();
+      await healFiles(healing); healing = null;
       await pushFiles();
+      if (HEAL.requeued) await healFiles(true);        // 다시 올린 뒤 결과 갱신
       lastOk = Date.now(); lastErr = '';
       if (!chan) {
         chan = sb.channel('docs-live').on('postgres_changes', { event: '*', schema: 'public', table: 'docs' }, () => kick()).subscribe();
@@ -362,6 +399,7 @@
     onStatus: f => { ST.add(f); status(); return () => ST.delete(f); },
     onAuth: f => { AUTHL.add(f); return () => AUTHL.delete(f); },
     syncNow: () => kick(true),
+    checkFiles: () => { healing = true; kick(true); },
     status,
     db, assets, downloads, user,
     async setName(name) { const id = myId(); if (!id) return; const cur = colMap('users').get(id) || {}; await write('users', id, { ...cur, name }); },
