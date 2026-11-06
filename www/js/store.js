@@ -8,7 +8,7 @@
   const CFG = window.APP_CONFIG || {};
   const READY = !!(CFG.supabaseUrl && CFG.supabaseKey && window.supabase);
   const sb = READY ? window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseKey, {
-    auth: { persistSession: true, autoRefreshToken: true, storageKey: 'gn-auth' },
+    auth: { persistSession: true, autoRefreshToken: true, storageKey: 'gn-auth-home' },
     realtime: { params: { eventsPerSecond: 5 } },
   }) : null;
   const BUCKET = 'photos';
