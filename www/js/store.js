@@ -352,6 +352,10 @@
     await metaSet('seeded', true);
   }
   async function sync() {
+    if (sb && !session && myId() && navigator.onLine) {   // 기기엔 로그인 기록이 있는데 서버 로그인이 끊긴 경우 (서버 이전 등)
+      lastErr = '서버 로그인이 끊겼습니다. 로그아웃 후 다시 로그인하세요 (기기에 있는 기록은 그대로 남고, 로그인하면 올라갑니다)';
+      status(); return;
+    }
     if (!sb || !session || !navigator.onLine) { status(); return; }
     if (syncing) { again = true; return; }
     syncing = true; status();
@@ -400,7 +404,8 @@
     },
     async signOut() {
       const c = await counts();
-      if (c.docs + c.files) throw new Error(`아직 서버에 못 올린 기록이 ${c.docs + c.files}건 있습니다. 인터넷 연결 후 동기화가 끝나면 로그아웃하세요.`);
+      if (session && c.docs + c.files) throw new Error(   // 서버 로그인이 끊긴 상태면 막지 않음 — 기록은 기기에 남아 다시 로그인 후 올라감
+`아직 서버에 못 올린 기록이 ${c.docs + c.files}건 있습니다. 인터넷 연결 후 동기화가 끝나면 로그아웃하세요.`);
       try { await sb.auth.signOut(); } catch (e) {}
       session = null; localStorage.removeItem('gn-uid');
     },
