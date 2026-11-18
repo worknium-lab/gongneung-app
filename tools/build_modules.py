@@ -95,6 +95,11 @@ s = rep(s, '\n</style>\n</head>', '''
 .embed .wrap { padding-block: 12px 24px !important; }
 :root.embed { --bg: #f3f5f6; --line: #d3d9dd; --navy: #1d5d86; --ink: #162027; --muted: #5b6871; }
 .embed .msgbar:empty { display: none; }
+/* 폰: 모듈 자체 아래 탭은 숨겼으니 저장 줄을 화면 맨 아래에 붙임 (앱 하단 탭은 모듈 바깥) · 단추 글자는 한 줄로 */
+@media (max-width: 640px) {
+  .embed form.panel > .actions { bottom: 0 !important; padding-bottom: 8px !important; }
+  .embed form.panel > .actions button { white-space: nowrap; padding-inline: 6px; font-size: 14px; }
+}
 </style>
 </head>''') if '\n</style>\n</head>' in s else s
 if '/* ---------- 통합 앱 안에서 ---------- */' not in s:
@@ -103,9 +108,19 @@ if '/* ---------- 통합 앱 안에서 ---------- */' not in s:
 .embed .wrap { padding-block: 12px 24px !important; }
 :root.embed { --bg: #f3f5f6; --line: #d3d9dd; --navy: #1d5d86; --ink: #162027; --muted: #5b6871; }
 .embed .msgbar:empty { display: none; }
+/* 폰: 모듈 자체 아래 탭은 숨겼으니 저장 줄을 화면 맨 아래에 붙임 (앱 하단 탭은 모듈 바깥) · 단추 글자는 한 줄로 */
+@media (max-width: 640px) {
+  .embed form.panel > .actions { bottom: 0 !important; padding-bottom: 8px !important; }
+  .embed form.panel > .actions button { white-space: nowrap; padding-inline: 6px; font-size: 14px; }
+}
 </style>
 
 <div class="wrap" id="app">''')
+# PDF 그림: html2canvas가 겹친 표 테두리(border-collapse)를 칸마다 따로 그려 선이 두 줄 · 굵기 들쭉날쭉 → 그림 찍을 때만 오른쪽 · 아래 선 방식으로
+s = rep(s, '#pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }\n',
+        '#pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }\n'
+        '#pdfStage .paper table { border-collapse: separate; border-spacing: 0; border-top: 1px solid #000; border-left: 1px solid #000; }\n'
+        '#pdfStage .paper td, #pdfStage .paper th { border-width: 0 1px 1px 0; }\n')
 # 입력하면 기기에 바로 저장 (오프라인에서도 기록이 남고, 연결되면 서버로)
 s = rep(s, "  schedulePreview(); saveDraft();\n});\n$$('form')", "  schedulePreview(); saveDraft(); autoSave();\n});\n$$('form')")
 s = rep(s, "$('addEq').onclick =", "let asT = 0; function autoSave() { window.__touched = true; clearTimeout(asT); asT = setTimeout(() => { asT = 0; saveRecord(true); }, 1200); }\n$('addEq').onclick =")

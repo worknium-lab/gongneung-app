@@ -190,6 +190,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .count b { color: var(--ink); }
 #pdfStage { position: fixed; left: -12000px; top: 0; }
 #pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }
+#pdfStage .paper table { border-collapse: separate; border-spacing: 0; border-top: 1px solid #000; border-left: 1px solid #000; }
+#pdfStage .paper td, #pdfStage .paper th { border-width: 0 1px 1px 0; }
 
 /* pane switch + zoom (phone) */
 .seg { display: none; }
@@ -270,6 +272,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .embed .wrap { padding-block: 12px 24px !important; }
 :root.embed { --bg: #f3f5f6; --line: #d3d9dd; --navy: #1d5d86; --ink: #162027; --muted: #5b6871; }
 .embed .msgbar:empty { display: none; }
+/* 폰: 모듈 자체 아래 탭은 숨겼으니 저장 줄을 화면 맨 아래에 붙임 (앱 하단 탭은 모듈 바깥) · 단추 글자는 한 줄로 */
+@media (max-width: 640px) {
+  .embed form.panel > .actions { bottom: 0 !important; padding-bottom: 8px !important; }
+  .embed form.panel > .actions button { white-space: nowrap; padding-inline: 6px; font-size: 14px; }
+}
 </style>
 
 <div class="wrap" id="app">
