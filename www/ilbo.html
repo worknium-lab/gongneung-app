@@ -1046,7 +1046,7 @@ async function makePdf() {
       for (const k of ks) {
         stage.innerHTML = `<div class="paper">${withState(st, () => pageHTML(k))}</div>`;
         const el = stage.firstChild;
-        const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });
+        const canvas = await window.html2canvas(el, { scale: 3, backgroundColor: '#ffffff', logging: false, useCORS: true });
         const img = canvas.toDataURL('image/jpeg', 0.9);
         let w = 210, h = canvas.height * 210 / canvas.width, x = 0;
         if (h > 297) { w = 297 * canvas.width / canvas.height; h = 297; x = (210 - w) / 2; }
@@ -1116,7 +1116,7 @@ window.ILBO = {
     if (!st) return null;
     const stage = $('pdfStage');
     stage.innerHTML = `<div class="paper">${withState(st, () => pageHTML(kind))}</div>`;
-    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; return await window.html2canvas(stage.firstChild, { scale: 2, backgroundColor: '#ffffff', logging: false }); }
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; return await window.html2canvas(stage.firstChild, { scale: 3, backgroundColor: '#ffffff', logging: false }); }
     finally { stage.innerHTML = ''; }
   },
   async word(kind) { await offer(kind); },

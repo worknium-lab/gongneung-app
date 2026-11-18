@@ -116,6 +116,9 @@ if '/* ---------- 통합 앱 안에서 ---------- */' not in s:
 </style>
 
 <div class="wrap" id="app">''')
+# PDF 해상도: A4 한 쪽을 3배(약 288dpi, 인쇄 표준)로 — 2배(192dpi)는 인쇄하면 작은 글자가 흐릿
+s = rep(s, "const canvas = await window.html2canvas(el, { scale: 2, backgroundColor: '#ffffff', logging: false, useCORS: true });",
+        "const canvas = await window.html2canvas(el, { scale: 3, backgroundColor: '#ffffff', logging: false, useCORS: true });")
 # PDF 그림: html2canvas가 겹친 표 테두리(border-collapse)를 칸마다 따로 그려 선이 두 줄 · 굵기 들쭉날쭉 → 그림 찍을 때만 오른쪽 · 아래 선 방식으로
 s = rep(s, '#pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }\n',
         '#pdfStage .paper { transform: none !important; margin: 0 !important; box-shadow: none; }\n'
@@ -164,7 +167,7 @@ window.ILBO = {
     if (!st) return null;
     const stage = $('pdfStage');
     stage.innerHTML = `<div class="paper">${withState(st, () => pageHTML(kind))}</div>`;
-    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; return await window.html2canvas(stage.firstChild, { scale: 2, backgroundColor: '#ffffff', logging: false }); }
+    try { if (document.fonts && document.fonts.ready) await document.fonts.ready; return await window.html2canvas(stage.firstChild, { scale: 3, backgroundColor: '#ffffff', logging: false }); }
     finally { stage.innerHTML = ''; }
   },
   async word(kind) { await offer(kind); },
