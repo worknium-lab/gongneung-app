@@ -58,8 +58,13 @@ main{flex:1;min-height:0;position:relative}
 .lock{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:10px;white-space:nowrap}
 .lock svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
 
-nav.tabs{flex:none;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
-nav.tabs button{appearance:none;border:0;border-top:3px solid transparent;background:none;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);padding:0;white-space:nowrap;letter-spacing:-.03em}
+nav.tabs{flex:none;display:flex;overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav.tabs::-webkit-scrollbar{display:none}
+/* 탭이 화면보다 많으면 끝을 흐리게 해서 옆에 더 있다는 걸 보여 줌 */
+nav.tabs.more-r{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent)}
+nav.tabs.more-l{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%);mask-image:linear-gradient(90deg,transparent,#000 12%)}
+nav.tabs.more-l.more-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+nav.tabs button{flex:0 0 max(64px,calc(100% / 8.5));scroll-snap-align:start;appearance:none;border:0;border-top:3px solid transparent;background:none;height:var(--nav-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);padding:0;white-space:nowrap;letter-spacing:-.03em}
 nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--accent)}
 
@@ -150,6 +155,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
 
 @media (min-width:900px){
   nav.tabs{max-width:720px;width:100%;margin:0 auto;border:1px solid var(--line);border-bottom:0;border-radius:12px 12px 0 0}
+  nav.tabs button{flex:1 0 0}
 }
 @media (prefers-color-scheme:dark){ /* 현장 화면은 밝은 테마로 고정 (모듈과 일치) */ }
 </style>
@@ -229,6 +235,9 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <!-- 제출서류: 제출서류 모듈 (처음 열 때 불러옴) -->
     <iframe class="frame off" id="fSubm" title="제출서류"></iframe>
 
+    <!-- 내역: 본사가 확정해 보낸 내역서 (보기 전용, 처음 열 때 불러옴) -->
+    <iframe class="frame off" id="fNae" title="내역"></iframe>
+
     <!-- 보고서 -->
     <section class="pane" id="p-report" hidden>
       <div class="wrap">
@@ -291,6 +300,7 @@ nav.tabs button[aria-current="page"]{color:var(--accent);border-top-color:var(--
     <button data-t="photo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>현장사진</button>
     <button data-t="dwg"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z"/><path d="M9 4v14M15 6v14"/></svg>도면</button>
     <button data-t="report"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7h16v7h-2"/><rect x="6" y="15" width="12" height="6"/></svg>보고서</button>
+    <button data-t="nae"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4M15 16h1"/></svg>내역</button>
     <button data-t="subm"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/><path d="M8 13h8M8 16.5h5"/></svg>제출서류</button>
   </nav>
 </div>
@@ -330,7 +340,7 @@ let DATE = iso(new Date());
 let MONTH = DATE.slice(0, 7);
 let TAB = 'cal';
 let REPORTS = {}, PHOTOS = [];
-const fProg = $('fProg'), fIlbo = $('fIlbo'), fDwg = $('fDwg'), fSubm = $('fSubm');
+const fProg = $('fProg'), fIlbo = $('fIlbo'), fDwg = $('fDwg'), fSubm = $('fSubm'), fNae = $('fNae');
 const DW = () => fDwg.contentWindow;
 const PW = () => fProg.contentWindow, IW = () => fIlbo.contentWindow;
 window.START_DATE = DATE;
@@ -355,7 +365,10 @@ function setTab(t) {
   if (t !== 'dwg') window.DWG_FULL(false);
   fSubm.classList.toggle('off', t !== 'subm');
   if (t === 'subm' && !fSubm.getAttribute('src')) fSubm.src = 'subm.html';
-  $('dateBar').hidden = t === 'cal' || t === 'prog' || t === 'dwg' || t === 'subm';
+  fNae.classList.toggle('off', t !== 'nae');
+  if (t === 'nae' && !fNae.getAttribute('src')) fNae.src = 'nae.html';
+  $('dateBar').hidden = t === 'cal' || t === 'prog' || t === 'dwg' || t === 'subm' || t === 'nae';
+  const tb = document.querySelector(`#tabs button[data-t="${t}"]`); if (tb) tb.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   $('monthBar').hidden = t !== 'cal';
   try {
     if (t === 'prog') PW().show(PV);
@@ -367,6 +380,8 @@ function setTab(t) {
   try { localStorage.setItem('gn-tab', t); } catch (e) {}
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setTab(b.dataset.t); });
+function tabEdge() { const n = $('tabs'); n.classList.toggle('more-l', n.scrollLeft > 4); n.classList.toggle('more-r', n.scrollLeft + n.clientWidth < n.scrollWidth - 4); }
+$('tabs').addEventListener('scroll', tabEdge, { passive: true }); window.addEventListener('resize', tabEdge); setTimeout(tabEdge, 0);
 let PV = 'status';
 $('progSub').addEventListener('click', e => {
   const b = e.target.closest('[data-pv]'); if (!b) return; PV = b.dataset.pv;
@@ -662,6 +677,7 @@ $('loginForm').addEventListener('submit', async e => {
     if (!$('sheet').hidden) { $('sheet').hidden = true; return; }
     try { if (TAB === 'dwg' && DW().DWG && DW().DWG.back()) return; } catch (e) {}
     try { if (TAB === 'subm' && fSubm.contentWindow.SUBM && fSubm.contentWindow.SUBM.back()) return; } catch (e) {}
+    try { if (TAB === 'nae' && fNae.contentWindow.NAE && fNae.contentWindow.NAE.back()) return; } catch (e) {}
     try { const pb = PW().document.getElementById('pbox'); if (pb && !pb.hidden) { PW().document.getElementById('pbClose').click(); return; } } catch (e) {}
     if (TAB !== 'cal') setTab('cal'); else A.minimizeApp();
   });

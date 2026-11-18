@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>공릉천교 내역</title>
+<link rel="stylesheet" href="css/fonts.css">
+<script>
+window.EMBED = window.parent !== window;
+if (window.EMBED && window.parent.claude) window.claude = window.parent.claude;
+</script>
+<style>
+/* 내역 모듈 (보기 전용): 본사(지엠로드)가 확정해 보낸 내역서 — 프로젝트 · 내역서 · 원가. WORKNIUM 적산 모바일 화면을 이 앱 모양으로
+   쓰는 때: 시공 전 규격 · 수량 확인, 자재 반입 수량 대조, 감독관이 계약금액 · 진도를 물을 때 */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --sunk:#e8ecee; --line:#d3d9dd; --line2:#e8ecee; --fg:#162027; --muted:#5b6871;
+  --accent:#1d5d86; --accent-soft:#d9e7f0; --done:#2f7d4f; --work:#c26b12; --work-ink:#8a4a0c; --work-soft:#f8e8d4;
+  --bb1:#1d5d86; --bb2:#3f7fa8; --bb3:#7aa9c7; --bb4:#a9c6d8; --bb5:#2f7d4f; --bb6:#c26b12; --bb7:#8a969d;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.subbar{flex:none;padding:10px 12px 0;max-width:720px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:8px}
+.seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--sunk);border-radius:10px;padding:3px}
+.seg button{height:40px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.src{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.ro{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:10px;white-space:nowrap}
+.ro svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.2}
+main{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch}
+.wrap{max-width:720px;margin:0 auto;padding:10px 12px 28px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.card h2{margin:0 0 4px;font-size:14.5px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:13.5px;padding:2px 0}
+.kv>span:first-child{color:var(--muted)}
+.kv b,.kv .v{font-family:var(--f-num);font-variant-numeric:tabular-nums;font-weight:500;text-align:right}
+.kv.big b{font-size:17px;font-weight:600}
+.kv.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:8px}
+.kv.tot span:first-child{color:var(--fg);font-weight:600}
+.kv.tot b{font-size:17px;color:var(--accent);font-weight:600}
+.kv.bold span:first-child{color:var(--fg);font-weight:600}
+.kv.bold .v{font-weight:600}
+.bar{height:7px;background:var(--sunk);border-radius:4px;overflow:hidden;margin:2px 0}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bbar{display:flex;height:40px;border-radius:6px;overflow:hidden;margin:4px 0}
+.bbar span{border-right:1px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;overflow:hidden;white-space:nowrap}
+.bbar span:last-child{border-right:0}
+.lg{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;font-size:12px;color:var(--muted)}
+.lg span{display:flex;align-items:center;gap:6px}
+.lg i{width:10px;height:10px;border-radius:2px;flex:none}
+.lg b{margin-left:auto;font-family:var(--f-num);font-weight:500;color:var(--fg)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line2);font-size:13.5px}
+.row:first-of-type{border-top:0}
+.row b{font-family:var(--f-num);font-weight:500;font-size:13px;white-space:nowrap}
+.row .on{font-size:10.5px;font-weight:600;color:var(--accent);background:var(--accent-soft);padding:1px 7px;border-radius:9px;margin-left:6px}
+.note{font-size:12px;color:var(--muted);margin:0}
+.search{height:44px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:0 12px;width:100%}
+/* 내역서: 공종 접기 · 펼치기, 항목 두 줄 (품명 · 수량 · 금액 / 재료 · 노무 · 경비 · 합계 단가) */
+.acc{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.acc>button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:50px;padding:6px 14px;border:0;background:transparent;text-align:left}
+.acc>button b{font-weight:600;font-size:14.5px}
+.acc>button span{font-family:var(--f-num);font-size:13px;white-space:nowrap}
+.acc .in{padding:0 14px 6px;border-top:1px solid var(--line2)}
+.gh{display:flex;justify-content:space-between;gap:10px;padding:10px 0 4px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid var(--line2)}
+.gh span{font-family:var(--f-num);font-weight:500;white-space:nowrap}
+.mi{padding:10px 0;border-bottom:1px solid var(--line2)}
+.mi:last-child{border-bottom:0}
+.mi1{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:baseline;font-size:13.5px}
+.mi1 small{display:block;font-size:11.5px;color:var(--muted)}
+.mi1 .q{font-family:var(--f-num);font-size:12.5px;white-space:nowrap}
+.mi1 .q small{display:inline;font-size:11px}
+.mi1 .t{font-family:var(--f-num);font-size:13px;font-weight:600;min-width:86px;text-align:right;white-space:nowrap}
+.mi2{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px;background:var(--bg);border-radius:6px;padding:5px 8px;font-family:var(--f-num);font-size:11.5px}
+.mi2 span{display:flex;flex-direction:column;align-items:flex-end}
+.mi2 small{font-family:var(--f-body);color:var(--muted);font-size:10px}
+.mi2 .sum{font-weight:600;color:var(--accent)}
+.path{font-size:11px;color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:36px 16px;font-size:14px;line-height:1.7}
+.empty b{color:var(--fg)}
+mark{background:var(--work-soft);color:inherit;border-radius:2px}
+</style>
+</head>
+<body>
+<div class="subbar">
+  <div class="seg" role="group" aria-label="내역 보기">
+    <button data-v="home" aria-pressed="true">프로젝트</button>
+    <button data-v="boq" aria-pressed="false">내역서</button>
+    <button data-v="cost" aria-pressed="false">원가</button>
+  </div>
+  <div class="src" id="src"></div>
+</div>
+<main id="main"><div class="wrap" id="out"><div class="empty">불러오는 중…</div></div></main>
+
+<script>
+const $ = id => document.getElementById(id);
+const W = v => (v == null || v === '' ? '' : Math.trunc(Number(v)).toLocaleString('ko-KR'));
+const Q = v => (v == null ? '' : Number(v).toLocaleString('ko-KR', { maximumFractionDigits: 3 }));
+const P = (a, b, d = 1) => (b ? ((a / b) * 100).toFixed(d) + '%' : '');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nz = s => String(s || '').replace(/\s+/g, '').toLowerCase();
+const day = s => (s ? String(s).slice(0, 10).replace(/-/g, '.') : '');
+const LOCK = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+const COLORS = ['--bb1', '--bb2', '--bb3', '--bb4', '--bb5', '--bb6', '--bb7'];
+
+let D = null, VIEW = 'home', OPEN = null, FIND = '';
+try { VIEW = localStorage.getItem('gn-nae-view') || 'home'; } catch (e) {}
+
+function setView(v) {
+  VIEW = v;
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === v)));
+  try { localStorage.setItem('gn-nae-view', v); } catch (e) {}
+  render(); $('main').scrollTop = 0;
+}
+document.querySelector('.seg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setView(b.dataset.v); });
+
+function render() {
+  const out = $('out');
+  if (!D) {
+    $('src').innerHTML = '';
+    out.innerHTML = '<div class="empty"><b>아직 본사에서 보낸 내역서가 없습니다.</b><br>본사에서 확정한 내역서를 보내면 여기에 나옵니다.<br>(지엠로드 ④ 내역서 › 한눈에 › 현장 앱)</div>';
+    return;
+  }
+  $('src').innerHTML = `<span class="ro">${LOCK}보기 전용</span><span>${esc(D.base && D.base.title)} · 본사 확정본 · ${day(D.sent_at)} 받음</span>`;
+  out.innerHTML = VIEW === 'boq' ? boqHtml() : VIEW === 'cost' ? costHtml() : homeHtml();
+}
+
+/* ---------- 프로젝트 ---------- */
+function homeHtml() {
+  const pr = D.progress;
+  const bar = (D.bar || []), sum = bar.reduce((s, x) => s + Number(x[1]), 0);
+  return `
+  <div class="card"><h2>계약</h2>
+    ${D.design_total ? `<div class="kv"><span>설계 도급액</span><b>${W(D.design_total)}</b></div>` : ''}
+    <div class="kv big"><span>${D.base && D.base.kind === 'final' ? '변경 후 도급액' : '도급액'}${D.rate ? ` (낙찰률 ${(D.rate * 100).toFixed(3)}%)` : ''}</span><b>${W(D.contract_total)}</b></div>
+    <p class="note">기준: ${esc(D.base && D.base.title)}${D.base && D.base.confirmed_at ? ' · ' + day(D.base.confirmed_at) + ' 확정' : ''}</p>
+  </div>
+  ${pr ? `<div class="card"><h2>기성 ${esc(pr.title)}</h2>
+    <div class="kv"><span>누계 진도</span><b>${(pr.cum_rate * 100).toFixed(1)}%</b></div>
+    <div class="bar"><i style="width:${Math.min(100, pr.cum_rate * 100)}%"></i></div>
+    <div class="kv"><span>금회 기성금</span><b>${W(pr.cur_pay)}</b></div>
+    <div class="kv"><span>누계 기성금</span><b>${W(pr.cum_pay)}</b></div>
+    ${pr.from ? `<p class="note">기간 ${day(pr.from)} ~ ${day(pr.to)} · 확정된 회차 기준</p>` : ''}
+  </div>` : ''}
+  ${bar.length ? `<div class="card"><h2>금액 구성</h2>
+    <div class="bbar" role="img" aria-label="${bar.map(x => `${x[0]} ${P(x[1], sum)}`).join(', ')}">${bar.map((x, i) => `<span style="flex:${x[1]};background:var(${COLORS[i % 7]})">${x[1] / sum > 0.09 ? esc(String(x[0]).slice(0, 3)) : ''}</span>`).join('')}</div>
+    <div class="lg">${bar.map((x, i) => `<span><i style="background:var(${COLORS[i % 7]})"></i>${esc(x[0])}<b>${P(x[1], sum)}</b></span>`).join('')}</div>
+  </div>` : ''}
+  <div class="card"><h2>문서</h2>
+    ${(D.docs || []).map(d => `<div class="row"><span>${esc(d.n)}${d.on ? '<span class="on">기준</span>' : ''}</span><b>${d.a == null ? '' : W(d.a)}</b></div>`).join('')}
+  </div>`;
+}
+
+/* ---------- 내역서 ---------- */
+function itemHtml(n, path) {
+  const sumU = (n.m || 0) + (n.l || 0) + (n.e || 0);
+  return `<div class="mi">
+    ${path ? `<div class="path">${esc(path)}</div>` : ''}
+    <div class="mi1"><div>${hl(n.n)}${n.s ? `<small>${hl(n.s)}</small>` : ''}</div><span class="q">${Q(n.q)} <small>${esc(n.u || '')}</small></span><span class="t">${W(n.t)}</span></div>
+    <div class="mi2"><span><small>재료</small>${W(n.m) || '0'}</span><span><small>노무</small>${W(n.l) || '0'}</span><span><small>경비</small>${W(n.e) || '0'}</span><span class="sum"><small>합계</small>${W(sumU) || '0'}</span></div>
+  </div>`;
+}
+/** 찾은 글자 표시 (찾는 말이 그대로 들어 있을 때만 — 띄어쓰기가 달라 찾은 줄은 표시 없이 보임) */
+function hl(s) {
+  const raw = String(s == null ? '' : s), f = FIND.trim();
+  const j = f ? raw.toLowerCase().indexOf(f.toLowerCase()) : -1;
+  return j < 0 ? esc(raw) : esc(raw.slice(0, j)) + '<mark>' + esc(raw.slice(j, j + f.length)) + '</mark>' + esc(raw.slice(j + f.length));
+}
+function inner(nodes, depth) {
+  return nodes.map(n => n.c
+    ? `<div class="gh" style="padding-left:${(depth - 1) * 10}px"><span style="font-family:inherit;font-weight:600">${esc(n.n)}</span><span>${W(n.t)}</span></div>${inner(n.c, depth + 1)}`
+    : itemHtml(n)).join('');
+}
+function boqHtml() {
+  const tree = D.tree || [];
+  const head = `<input class="search" id="find" type="search" placeholder="공종 · 규격으로 찾기 (예: 받침, PTFE)" value="${esc(FIND)}" aria-label="공종 찾기">`;
+  if (FIND.trim()) {
+    const hits = [];
+    const walk = (ns, path) => ns.forEach(n => { if (n.c) walk(n.c, path.concat(n.n)); else if (nz(n.n + ' ' + (n.s || '')).includes(nz(FIND))) hits.push(itemHtml(n, path.join(' › '))); });
+    walk(tree, []);
+    return head + `<p class="note">${hits.length}개 찾음${hits.length > 200 ? ' · 앞 200개' : ''}</p><div class="card">${hits.slice(0, 200).join('') || '<span class="note">찾는 공종이 없습니다.</span>'}</div>`;
+  }
+  const direct = D.direct ? `<div class="card"><div class="kv"><span>직접공사비</span><b>${W(D.direct.t)}</b></div><div class="kv"><span>도급액</span><b>${W(D.contract_total)}</b></div></div>` : '';
+  return head + direct + tree.map((g, i) => {
+    const on = OPEN === null ? i === 0 : OPEN === i;
+    return `<div class="acc"><button data-g="${i}" aria-expanded="${on}"><b>${on ? '▾' : '▸'} ${esc(g.n)}</b><span>${W(g.t)}</span></button>${on ? `<div class="in">${g.c ? inner(g.c, 1) : itemHtml(g)}</div>` : ''}</div>`;
+  }).join('') + '<p class="note">공종을 누르면 항목이 펼쳐집니다. 아래 줄은 단위당 재료비 · 노무비 · 경비 · 합계 단가입니다.</p>';
+}
+$('out').addEventListener('click', e => {
+  const b = e.target.closest('[data-g]'); if (!b) return;
+  const i = Number(b.dataset.g); const cur = OPEN === null ? 0 : OPEN;
+  OPEN = cur === i ? -1 : i; render();
+  const el = document.querySelector(`[data-g="${i}"]`); if (el) el.scrollIntoView({ block: 'nearest' });
+});
+let ft = null;
+$('out').addEventListener('input', e => {
+  if (e.target.id !== 'find') return;
+  FIND = e.target.value; clearTimeout(ft);
+  ft = setTimeout(() => { const pos = e.target.selectionStart; render(); const f = $('find'); if (f) { f.focus(); try { f.setSelectionRange(pos, pos); } catch (x) {} } }, 250);
+});
+
+/* ---------- 원가 ---------- */
+function costHtml() {
+  const rows = D.summary || [];
+  const s = D.share || {};
+  const rest = rows.slice(0, -1), last = rows[rows.length - 1];
+  return `<div class="card"><h2>원가계산서</h2>
+    ${rest.map(r => `<div class="kv${r.b ? ' bold' : ''}"><span>${esc(r.n)}</span><span class="v">${W(r.a)}</span></div>`).join('')}
+    ${last ? `<div class="kv tot"><span>${esc(last.n)}</span><b>${W(last.a)}</b></div>` : ''}
+    <p class="note">${esc(D.base && D.base.title)} 엑셀의 원가계산서 그대로입니다.</p>
+  </div>
+  ${s.D ? `<div class="card"><h2>비목 비율</h2>
+    ${[['재료비', s.A], ['노무비', s.B], ['경비', s.C]].map(([k, v]) => `<div class="kv"><span>${k}</span><span class="v">${P(v, s.D)}</span></div><div class="bar"><i style="width:${Math.max(0, Math.min(100, (v / s.D) * 100))}%"></i></div>`).join('')}
+    <p class="note">${D.cost_method === 'cost' ? '순공사원가 대비' : '직접공사비 대비'}</p>
+  </div>` : ''}`;
+}
+
+/* ---------- 연결 ---------- */
+window.NAE = { back() { if (FIND) { FIND = ''; render(); return true; } return false; } };
+(async () => {
+  if (!window.claude || !claude.use) { $('out').innerHTML = '<div class="empty">앱 안에서 열어 주세요.</div>'; return; }
+  const db = await claude.use('db');
+  db.collection('boq').onSnapshot(s => {
+    const docs = s.docs.map(x => ({ id: x.id, ...x.data() }));
+    D = docs.find(d => d.id === 'current') || docs[0] || null;
+    if (D && D.v !== 1) D = null;
+    render();
+  });
+})();
+</script>
+</body>
+</html>
