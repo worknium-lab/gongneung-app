@@ -28,6 +28,8 @@ BRIDGE = '''<script>
 window.EMBED = window.parent !== window;
 if (window.EMBED && window.parent.claude) window.claude = window.parent.claude;
 document.documentElement.classList.toggle('embed', window.EMBED);
+/* 현장 화면은 밝은 테마로 고정: 폰이 다크 모드여도 글자·칸 색이 섞이지 않게 */
+document.documentElement.dataset.theme = 'light';
 </script>'''
 
 # ---------------------------------------------------------------- 공정률 (+ 현장 사진 + 공정현황 보고서)
