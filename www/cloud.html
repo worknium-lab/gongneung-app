@@ -73,6 +73,7 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 .row .ic{flex:none;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--f-num);font-size:10.5px;font-weight:600;background:var(--sunk);color:var(--ink2)}
 .row .ic.dir{background:var(--accent-soft);color:var(--accent)}
 .row .ic.dir svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.row .ic.dwg{background:#162027;color:#fff}
 .row .ic.pdf{background:#f6dedc;color:#9a241d} .row .ic.xls{background:#dcefe3;color:#1f6b3f} .row .ic.hwp{background:#d9e7f0;color:#1d5d86} .row .ic.img{background:#ebe3f4;color:#5b3d8a}
 .row .nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
 .row .nm b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -127,7 +128,7 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
       </div>
       <div class="tbl" id="rows" hidden></div>
       <div class="empty" id="empty" hidden><span id="emptyT"></span><button class="btn" id="retry" hidden>다시 시도</button></div>
-      <p class="note" id="foot" style="padding:2px 4px" hidden>파일을 누르면 앱 안에서 열립니다 (PDF · 엑셀 · 한글 hwpx · 사진). 클라우드는 인터넷이 연결돼 있을 때만 보입니다. 지우기 · 이름 바꾸기는 PC의 니움클라우드에서 하세요.</p>
+      <p class="note" id="foot" style="padding:2px 4px" hidden>파일을 누르면 앱 안에서 열립니다 (도면 dwg · PDF · 엑셀 · 한글 · 워드 · PPT · 사진). 클라우드는 인터넷이 연결돼 있을 때만 보입니다. 지우기 · 이름 바꾸기는 PC의 니움클라우드에서 하세요.</p>
     </div>
   </section>
 
@@ -161,6 +162,8 @@ const STORE = window.parent !== window ? window.parent.STORE : null;
 const CFG = window.parent !== window ? (window.parent.APP_CONFIG || {}) : {};
 const sb = STORE && STORE.sb;
 const gw = () => sb.schema('groupware');
+/* 서버 변환기를 거쳐 보는 것: 도면(dwg → DXF), 한글 · 워드 · PPT(→ PDF). 원본은 「열기 · 내려받기」를 누를 때 받음 */
+const CONVERT = ['dwg', 'hwp', 'hwpx', 'doc', 'ppt', 'pptx'], MAXCONV = 300 * 1024 * 1024;
 const BUCKET = 'cloud', CHUNK = 6 * 1024 * 1024, MAXOPEN = 150 * 1024 * 1024;
 const FIELDS = 'id,owner,parent_id,name,is_folder,size,mime,updated_at';
 let QUOTA = null;   // 현장 폴더 용량 한도 {quota_bytes, used_bytes} (한도가 없으면 null)
@@ -249,6 +252,7 @@ function head() {
 function iconOf(it) {
   if (it.is_folder) return '<span class="ic dir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>';
   const k = kind(it);
+  if (['dwg', 'dxf'].includes(ext(it.name))) return `<span class="ic dwg">${ext(it.name).toUpperCase()}</span>`;
   return `<span class="ic ${k}">${esc(k === 'img' ? '사진' : (ext(it.name).toUpperCase().slice(0, 4) || '파일'))}</span>`;
 }
 function render() {
@@ -281,21 +285,59 @@ async function openFile(it) {
   $('vName').textContent = it.name; $('vMeta').textContent = `${fmtSize(it.size || 0)} · ${day(it.updated_at)}`;
   $('vOpen').disabled = $('vSave').disabled = true;
   render();
-  if ((it.size || 0) > MAXOPEN) return pvMsg('150MB가 넘는 파일은 앱에서 받을 수 없습니다.<br>PC의 니움클라우드(gw.worknium.co.kr/cloud)에서 받으세요.');
+  const big = (it.size || 0) > MAXOPEN, e = ext(it.name);
+  if (CONVERT.includes(e) && CFG.previewUrl && (it.size || 0) <= MAXCONV) {
+    $('vOpen').disabled = $('vSave').disabled = big;   // 원본은 단추를 누를 때 받음
+    pvMsg(e === 'dwg' ? '도면을 준비하는 중… (큰 도면은 1분쯤 걸립니다)' : '미리보기를 만드는 중…');
+    try {
+      const c = await convert(it); if (my !== SEQ) return;
+      const r = await fetch(c.url); if (!r.ok) throw new Error('변환한 파일을 받지 못했습니다');
+      const b = await r.blob(); if (my !== SEQ) return;
+      if (c.kind === 'dxf') await showDxf(b, my); else await showPdf(b, my);
+    } catch (x) {
+      console.warn(x); if (my !== SEQ) return;
+      if (e === 'hwpx' && !big) { const b = await orig(it); if (my === SEQ && b) return previewBlob(it, b, my); }   // 변환기가 안 되면 글 · 표만 간단히
+      if (my === SEQ) pvMsg(esc(fail(x)) + '<br>「다른 앱으로 열기」로 열어 보세요.', false, () => openFile(it));
+    }
+    return;
+  }
+  if (big) return pvMsg('150MB가 넘는 파일은 앱에서 받을 수 없습니다.<br>PC의 니움클라우드(gw.worknium.co.kr/cloud)에서 받으세요.');
   pvMsg(`파일을 받는 중… (${fmtSize(it.size || 0)})`);
-  const { data, error } = await sb.storage.from(BUCKET).download(`${it.owner}/${it.id}`).catch(e => ({ error: e }));
+  const b = await orig(it);
   if (my !== SEQ) return;
-  if (error || !data) return pvMsg(esc(fail(error || '파일을 받지 못했습니다')), false, () => openFile(it));
-  CURBLOB = new Blob([data], { type: it.mime && it.mime !== 'application/octet-stream' ? it.mime : mimeOf(it.name) });
+  if (!b) return pvMsg('파일을 받지 못했습니다. 인터넷 연결을 확인하세요.', false, () => openFile(it));
   $('vOpen').disabled = $('vSave').disabled = false;
-  await previewBlob(it, CURBLOB, my);
+  await previewBlob(it, b, my);
+}
+/* 원본 파일 받기 (한 번 받은 것은 그 파일을 보는 동안 다시 안 받음) */
+async function orig(it) {
+  if (CUR === it && CURBLOB) return CURBLOB;
+  const { data, error } = await sb.storage.from(BUCKET).download(`${it.owner}/${it.id}`).catch(e => ({ error: e }));
+  if (error || !data) { console.warn(error); return null; }
+  const b = new Blob([data], { type: it.mime && it.mime !== 'application/octet-stream' ? it.mime : mimeOf(it.name) });
+  if (CUR === it) CURBLOB = b;
+  return b;
+}
+/* 서버 변환기에 맡기기: 내 로그인으로 서버가 원본을 직접 읽어 바꿈. 오래 걸려 연결이 끊기면 잠시 뒤 다시 물어봄 */
+async function convert(it) {
+  let r = null;
+  for (let i = 0; i < 5; i++) {
+    try { r = await fetch(`${CFG.previewUrl}/preview/convert?id=${it.id}`, { method: 'POST', headers: { Authorization: 'Bearer ' + await token() } }); } catch (e) { r = null; }
+    if (r && ![502, 503, 504, 520, 522, 524].includes(r.status)) break;
+    if (i < 4) await new Promise(ok => setTimeout(ok, 3000));
+  }
+  if (!r) throw new Error('미리보기 서버에 연결하지 못했습니다');
+  const d = await r.json().catch(() => ({ error: '미리보기 서버가 응답하지 않습니다. 잠시 후 다시 열어 주세요' }));
+  if (!r.ok) throw new Error(d.error || '변환하지 못했습니다');
+  return { url: CFG.previewUrl + d.url, kind: d.kind };
 }
 function closeView() { CUR = null; CURBLOB = null; ++SEQ; document.body.classList.remove('viewing'); stopPdf(); $('pv').innerHTML = ''; $('vNone').hidden = false; $('vHead').hidden = true; $('pv').hidden = true; $('vFoot').hidden = true; render(); }
 $('vBack').onclick = closeView;
-$('vOpen').onclick = async () => { if (!CUR || !CURBLOB) return; try { await openExternal(CUR.name, CURBLOB, CURBLOB.type); } catch (e) { toast('열지 못했습니다: ' + (e && e.message || e)); } };
+async function need() { if (!CUR) return null; if (CURBLOB) return CURBLOB; toast(`원본을 받는 중… (${fmtSize(CUR.size || 0)})`); const b = await orig(CUR); if (!b) toast('파일을 받지 못했습니다'); return b; }
+$('vOpen').onclick = async () => { const it = CUR, b = await need(); if (!b || CUR !== it) return; try { await openExternal(CUR.name, b, b.type); } catch (e) { toast('열지 못했습니다: ' + (e && e.message || e)); } };
 $('vSave').onclick = async () => {
-  if (!CUR || !CURBLOB) return;
-  try { await STORE.downloads.save({ filename: safeName(CUR.name), data: CURBLOB }); toast(native() ? '문서/공릉천교 폴더에 저장했습니다' : '내려받았습니다'); }
+  const it = CUR, b = await need(); if (!b || CUR !== it) return;
+  try { await STORE.downloads.save({ filename: safeName(CUR.name), data: b }); toast(native() ? '문서/공릉천교 폴더에 저장했습니다' : '내려받았습니다'); }
   catch (e) { toast('저장하지 못했습니다: ' + (e && e.message || e)); }
 };
 

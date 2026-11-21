@@ -131,7 +131,7 @@ class H(SimpleHTTPRequestHandler):
     def do_GET(self):
         u = urllib.parse.urlparse(self.path); q = urllib.parse.parse_qs(u.query)
         if u.path == '/js/config.js':
-            b = f"window.APP_CONFIG={{supabaseUrl:'http://localhost:{PORT}',supabaseKey:'test-key'}};".encode()
+            b = f"window.APP_CONFIG={{supabaseUrl:'http://localhost:{PORT}',supabaseKey:'test-key',previewUrl:'http://localhost:{PORT}'}};".encode()
             self.send_response(200); self.send_header('Content-Type', 'text/javascript'); self.end_headers(); self.wfile.write(b); return
         if u.path == '/auth/v1/user':
             return self.js(USER)
@@ -166,6 +166,9 @@ class H(SimpleHTTPRequestHandler):
             f = next((v for k, v in FILES.items() if v[1] == 'application/pdf'), None)
             if f:
                 self.send_response(200); self.cors(); self.send_header('Content-Type', f[1]); self.end_headers(); self.wfile.write(f[0]); return
+        if u.path == '/__dxf':
+            b = pathlib.Path(sys.argv[3]).read_bytes()
+            self.send_response(200); self.cors(); self.send_header('Content-Type', 'application/dxf'); self.send_header('Content-Length', str(len(b))); self.end_headers(); self.wfile.write(b); return
         if u.path == '/__state':
             return self.js({'docs': {f'{c}/{i}': r for (c, i), r in DOCS.items()}, 'files': list(FILES), 'cloud': list(ITEMS.values())})
         return super().do_GET()
@@ -198,6 +201,8 @@ class H(SimpleHTTPRequestHandler):
             return self.js([{'folder_id': json.loads(self.body())['p_folder'], 'quota_bytes': 50 * 1024 ** 3, 'used_bytes': used}])
         if u.path == '/__quota_used':
             QUOTA_USED[0] = int(json.loads(self.body())['used']); return self.js({'ok': 1})
+        if u.path == '/preview/convert':   # 변환기 흉내: 세 번째 인자로 준 DXF 를 돌려줌
+            return self.js({'url': '/__dxf', 'kind': 'dxf'}) if len(sys.argv) > 3 else self.js({'error': '변환기 없음'}, 500)
         if u.path == '/storage/v1/upload/resumable':
             tid = str(uuid.uuid4())
             TUS[tid] = {'len': int(self.headers['Upload-Length']), 'meta': self.headers['Upload-Metadata'], 'data': bytearray(self.body())}

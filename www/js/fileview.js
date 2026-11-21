@@ -30,8 +30,8 @@ function pvMsg(html, light, retry) {
 }
 let SEQ = 0;
 /* PDF: 쪽마다 화면 폭에 맞춰 그림. 두 손가락·버튼으로 확대 */
-let PDF = null, PDFOBS = null, ZOOM = 1, ZT = 0;
-function stopPdf() { if (PDFOBS) PDFOBS.disconnect(); PDFOBS = null; if (PDF) { try { PDF.destroy(); } catch (e) {} } PDF = null; ZOOM = 1; }
+let PDF = null, PDFOBS = null, ZOOM = 1, ZT = 0, DXF = null;
+function stopPdf() { if (DXF) { try { DXF.Destroy(); } catch (e) {} DXF = null; } if (PDFOBS) PDFOBS.disconnect(); PDFOBS = null; if (PDF) { try { PDF.destroy(); } catch (e) {} } PDF = null; ZOOM = 1; }
 async function pdfLib() {
   if (!window.pdfjsLib) { await loadScript('vendor/pdf.min.js'); window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js'; }
   return window.pdfjsLib;
@@ -220,6 +220,51 @@ const native = () => !!(window.Capacitor && window.Capacitor.isNativePlatform &&
 const b64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
 const safeName = n => String(n || '파일').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120);
 
+/* 도면(DXF — dwg 는 서버 변환기가 DXF 로 바꿔 준 것): 휠 · 두 손가락으로 확대, 끌어서 이동, 레이어 켜고 끄기. 그룹웨어와 같은 뷰어(dxf-viewer) */
+function dxfEncoding(head) {   // 옛 버전 도면(2004 이하)은 글자가 코드페이지(한글은 ANSI_949)로 저장됨
+  const ver = (/\$ACADVER\s*\r?\n\s*1\s*\r?\n\s*(AC\d{4})/.exec(head) || [])[1] || '';
+  if (ver >= 'AC1021') return 'utf-8';
+  const cp = ((/\$DWGCODEPAGE\s*\r?\n\s*3\s*\r?\n\s*(\S+)/.exec(head) || [])[1] || '').toUpperCase();
+  if (cp.includes('932')) return 'shift_jis';
+  if (cp.includes('936')) return 'gbk';
+  if (cp.includes('1252') || cp.includes('437')) return 'windows-1252';
+  return 'euc-kr';
+}
+async function showDxf(blob, my) {
+  if (!window.DxfViewer) await loadScript('vendor/dxfviewer.js');
+  const buf = new Uint8Array(await blob.arrayBuffer());
+  if (my !== SEQ) return;
+  stopPdf();
+  const pv = $('pv'); pv.className = 'dxf';
+  pv.innerHTML = '<div class="xv"><div class="xv-canvas" id="xvC"></div><div class="xv-over" id="xvO">도면 읽는 중…</div><div class="xv-tools" id="xvT" hidden><button data-x="fit">전체 보기</button><button data-x="lay" id="xvLB">레이어</button></div><div class="xv-layers" id="xvL" hidden></div><div class="xv-hint" id="xvH" hidden>두 손가락 · 휠로 확대, 끌어서 이동</div></div>';
+  const url = URL.createObjectURL(new Blob([buf]));
+  const v = new DxfViewer($('xvC'), { autoResize: true, fileEncoding: dxfEncoding(new TextDecoder('latin1').decode(buf.subarray(0, 200000))) });
+  DXF = v;
+  try {
+    await v.Load({ url, fonts: [new URL('fonts/NanumGothic.ttf', location.href).href],
+      progressCbk: ph => { const o = $('xvO'); if (o && DXF === v) o.textContent = ph === 'font' ? '글꼴 받는 중…' : ph === 'prepare' ? '도면 그리는 중…' : '도면 읽는 중…'; },
+      workerFactory: () => new Worker('vendor/dxfviewer.js') });
+  } finally { URL.revokeObjectURL(url); }
+  if (DXF !== v) { try { v.Destroy(); } catch (e) {} return; }
+  const layers = [...v.GetLayers()].map(l => ({ name: l.name, label: l.displayName, color: l.color, on: true })).sort((a, b) => a.label.localeCompare(b.label, 'ko', { numeric: true }));
+  const drawLayers = () => {
+    $('xvLB').textContent = `레이어 ${layers.filter(l => l.on).length}/${layers.length}`;
+    $('xvL').innerHTML = '<div class="xv-lh"><button data-x="all">모두 켜기</button><button data-x="close">닫기</button></div>' + layers.map((l, i) => `<label><input type="checkbox" data-i="${i}"${l.on ? ' checked' : ''}><i style="background:#${l.color.toString(16).padStart(6, '0')}"></i>${esc(l.label)}</label>`).join('');
+  };
+  drawLayers(); $('xvLB').hidden = !layers.length;
+  $('xvO').hidden = true; $('xvT').hidden = false; $('xvH').hidden = false;
+  $('xvT').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x === 'lay') { $('xvL').hidden = !$('xvL').hidden; return; }
+    const bd = v.GetBounds(), o = v.GetOrigin(); if (bd) v.FitView(bd.minX - o.x, bd.maxX - o.x, bd.minY - o.y, bd.maxY - o.y, 0.1);
+  };
+  $('xvL').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x === 'all') { layers.forEach(l => { l.on = true; v.ShowLayer(l.name, true); }); drawLayers(); } else $('xvL').hidden = true;
+  };
+  $('xvL').onchange = e => { const l = layers[+e.target.dataset.i]; if (!l) return; l.on = e.target.checked; v.ShowLayer(l.name, l.on); $('xvLB').textContent = `레이어 ${layers.filter(x => x.on).length}/${layers.length}`; };
+}
+
 /* 다른 앱으로 열기 (폰: 열 앱 고르기, PC: 새 창) */
 async function openExternal(name, blob, mime) {
   mime = mime && mime !== 'application/octet-stream' ? mime : mimeOf(name);
@@ -248,6 +293,7 @@ async function previewBlob(f, blob, my) {
     else if (k === 'xls') await showXls(blob, my);
     else if (k === 'hwp' && ext(f.name) === 'hwpx') await showHwpx(blob, my);
     else if (k === 'img') showImg(URL.createObjectURL(blob));
+    else if (ext(f.name) === 'dxf') await showDxf(blob, my);
     else pvMsg(`${esc(label(f))} 파일은 앱 안에서 미리 볼 수 없습니다.<br>아래 「다른 앱으로 열기」를 누르세요.`);
   } catch (e) {
     console.warn(e);
