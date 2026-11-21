@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>공릉천교 클라우드</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/fileview.css">
+<style>
+/* 클라우드 모듈: 니움클라우드(그룹웨어)의 현장 폴더를 앱에서 보기 · 올리기 · 새 폴더. 지우기 · 이름 바꾸기는 없음. 인터넷이 있어야 함 */
+:root{
+  --bg:#f3f5f6; --surface:#ffffff; --sunk:#e8ecee; --line:#d3d9dd; --line2:#e8ecee; --fg:#162027; --muted:#5b6871; --ink2:#3f4b54;
+  --accent:#1d5d86; --accent-soft:#d9e7f0; --warn:#b3261e;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);-webkit-tap-highlight-color:transparent;overflow:hidden}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{appearance:none;height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);font-weight:600;font-size:14px;padding:0 14px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg,.ico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.ico{appearance:none;width:44px;height:44px;border:0;background:none;border-radius:22px;display:inline-flex;align-items:center;justify-content:center;flex:none;padding:0}
+.ico.box{border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink2)}
+.ico:disabled{opacity:.45;cursor:not-allowed}
+.note{font-size:12px;color:var(--muted);margin:0}
+
+#app{height:100%;display:flex}
+#listPane{flex:1;min-width:0;display:flex;flex-direction:column;height:100%}
+#viewPane{display:none;flex-direction:column;height:100%;background:var(--bg)}
+body.viewing #listPane{display:none}
+body.viewing #viewPane{display:flex;flex:1;min-width:0}
+@media (min-width:900px){
+  #app{gap:14px;padding:14px 16px}
+  #listPane{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  body.viewing #listPane{display:flex}
+  #viewPane{display:flex;width:min(50%,620px);flex:none;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  body.viewing #viewPane{flex:none}
+  #vBack{display:none!important}
+}
+
+.lhead{background:var(--surface);border-bottom:1px solid var(--line);padding:8px 12px 12px;display:flex;flex-direction:column;gap:8px;flex:none}
+.crumb{display:flex;align-items:center;gap:4px;min-width:0;min-height:44px}
+.crumb .tt{flex:1;min-width:0;display:flex;flex-direction:column;padding-left:4px}
+.crumb .tt span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb .tt b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow{display:flex;gap:8px}
+.search{flex:1;display:flex;align-items:center;gap:8px;height:44px;border-radius:10px;background:var(--sunk);padding:0 12px;min-width:0}
+.search svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex:none}
+.search input{border:0;background:transparent;outline:none;font-size:14px;flex:1;min-width:0}
+.srow .btn{height:44px}
+#lBody{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:10px 12px 24px;display:flex;flex-direction:column;gap:8px}
+.up{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 6px 10px 12px;display:flex;flex-direction:column;gap:6px;flex:none}
+.up .r{display:flex;align-items:center;gap:8px;font-size:13px}
+.up .r .n{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.up .r .c{font-family:var(--f-num);font-size:12px;color:var(--muted);white-space:nowrap}
+.up .bar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden;margin-right:6px}
+.up .bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s}
+.tbl{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.row{display:flex;align-items:center;gap:12px;min-height:60px;padding:8px 4px 8px 12px;border:0;border-top:1px solid var(--line2);background:none;text-align:left;width:100%;appearance:none}
+.row:first-child{border-top:0}
+.row .ic{flex:none;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--f-num);font-size:10.5px;font-weight:600;background:var(--sunk);color:var(--ink2)}
+.row .ic.dir{background:var(--accent-soft);color:var(--accent)}
+.row .ic.dir svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.row .ic.pdf{background:#f6dedc;color:#9a241d} .row .ic.xls{background:#dcefe3;color:#1f6b3f} .row .ic.hwp{background:#d9e7f0;color:#1d5d86} .row .ic.img{background:#ebe3f4;color:#5b3d8a}
+.row .nm{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.row .nm b{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .nm span{font-family:var(--f-num);font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .go{flex:none;width:36px;display:flex;justify-content:center;color:var(--muted)}
+.row .go svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2}
+.row[aria-current="true"]{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.empty{color:var(--muted);font-size:14px;padding:28px 16px;text-align:center;border:1px dashed var(--line);border-radius:10px;background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:12px}
+
+.vhead{background:var(--surface);border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px;flex:none}
+.vhead .tt{flex:1;min-width:0;display:flex;flex-direction:column}
+.vhead .tt span{font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.vhead .tt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vfoot{flex:none;background:var(--surface);border-top:1px solid var(--line);padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px))}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.vnone{flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px;padding:24px;text-align:center}
+
+.ov{position:fixed;inset:0;z-index:20;background:rgba(22,32,39,.45);display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.sheet{background:var(--surface);border-radius:16px 16px 0 0;width:100%;max-width:560px;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);align-self:center}
+.sheet .hd{display:flex;align-items:center;gap:8px}
+.sheet h2{margin:0;font-size:17px;flex:1}
+.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.fld input{height:48px;border:1px solid var(--line);border-radius:10px;padding:0 12px;font-size:15px;color:var(--fg);background:#fff;width:100%}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(110px + env(safe-area-inset-bottom,0px));background:var(--fg);color:#fff;padding:9px 14px;border-radius:8px;font-size:13px;z-index:40;max-width:90%;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+  <section id="listPane" aria-label="클라우드 폴더">
+    <div class="lhead">
+      <div class="crumb">
+        <button class="ico" id="upDir" aria-label="위 폴더로" hidden><svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px"><path d="M15 5l-7 7 7 7"/></svg></button>
+        <div class="tt"><span id="cPath"></span><b id="cName">클라우드</b></div>
+        <button class="ico" id="reload" aria-label="새로 고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.500-5.800M20 4v5h-5"/></svg></button>
+      </div>
+      <div class="srow">
+        <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" placeholder="이 폴더에서 찾기" aria-label="이 폴더에서 찾기"></label>
+        <button class="ico box" id="mkBtn" aria-label="새 폴더" disabled><svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;stroke-width:1.8"><path d="M3 6h7l2 2h9v11H3z"/><path d="M12 11v5M9.500 13.500h5"/></svg></button>
+        <button class="btn pri" id="upBtn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 15v5h14v-5"/></svg>올리기</button>
+        <input type="file" id="upInput" multiple hidden>
+      </div>
+    </div>
+    <div id="lBody">
+      <div class="up" id="up" hidden>
+        <div class="r"><span class="n" id="upName"></span><span class="c" id="upCnt"></span><button class="ico" id="upCancel" aria-label="올리기 취소" style="width:36px;height:36px"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+        <div class="bar"><i id="upBar"></i></div>
+      </div>
+      <div class="tbl" id="rows" hidden></div>
+      <div class="empty" id="empty" hidden><span id="emptyT"></span><button class="btn" id="retry" hidden>다시 시도</button></div>
+      <p class="note" id="foot" style="padding:2px 4px" hidden>파일을 누르면 앱 안에서 열립니다 (PDF · 엑셀 · 한글 hwpx · 사진). 클라우드는 인터넷이 연결돼 있을 때만 보입니다. 지우기 · 이름 바꾸기는 PC의 니움클라우드에서 하세요.</p>
+    </div>
+  </section>
+
+  <section id="viewPane" aria-label="파일 보기">
+    <div class="vnone" id="vNone">왼쪽 목록에서 파일을 누르면 여기 보입니다.</div>
+    <div class="vhead" id="vHead" hidden>
+      <button class="ico" id="vBack" aria-label="목록으로"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="tt"><b id="vName"></b><span id="vMeta"></span></div>
+    </div>
+    <div id="pv" hidden></div>
+    <div class="vfoot" id="vFoot" hidden>
+      <div class="g2"><button class="btn" id="vOpen">다른 앱으로 열기</button><button class="btn pri" id="vSave">내려받기</button></div>
+    </div>
+  </section>
+</div>
+
+<div class="ov" id="mkOv" hidden>
+  <form class="sheet" id="mk" aria-label="새 폴더" autocomplete="off">
+    <div class="grab"></div>
+    <div class="hd"><h2>새 폴더</h2><button type="button" class="ico" id="mkClose" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <label class="fld">폴더 이름<input id="mkName" required maxlength="120"></label>
+    <button type="submit" class="btn pri">만들기</button>
+  </form>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="vendor/jszip.min.js"></script>
+<script src="js/fileview.js"></script>
+<script>
+const STORE = window.parent !== window ? window.parent.STORE : null;
+const CFG = window.parent !== window ? (window.parent.APP_CONFIG || {}) : {};
+const sb = STORE && STORE.sb;
+const gw = () => sb.schema('groupware');
+const BUCKET = 'cloud', CHUNK = 6 * 1024 * 1024, MAXOPEN = 150 * 1024 * 1024;
+const FIELDS = 'id,owner,parent_id,name,is_folder,size,mime,updated_at';
+let UID = null, ROOTS = [], SINGLE = false, PATH = [], ITEMS = [], CUR = null, CURBLOB = null, LSEQ = 0;
+let toastT = 0;
+function toast(t) { const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 3000); }
+const cur = () => PATH[PATH.length - 1] || null;
+const day = s => s ? String(s).slice(0, 10).replace(/-/g, '.') : '';
+const byName = (a, b) => (b.is_folder - a.is_folder) || String(a.name).localeCompare(b.name, 'ko', { numeric: true });
+function fail(e) {
+  const m = String(e && (e.message || e.error_description) || e);
+  if (!navigator.onLine || /failed to fetch|network|load failed/i.test(m)) return '인터넷에 연결되지 않았습니다. 클라우드는 연결돼 있을 때만 볼 수 있습니다.';
+  if (e && e.code === '23505') return '같은 이름이 이미 있습니다.';
+  if (/row-level security|permission|not authorized|unauthorized|403/i.test(m)) return '이 폴더에 올릴 권한이 없습니다.';
+  return m;
+}
+
+/* ---------- 시작: 내가 볼 수 있는 맨 위 폴더 ---------- */
+async function start() {
+  showMsg('불러오는 중…');
+  if (!sb) return showMsg('앱 안에서 열어 주세요.');
+  try {
+    const { data } = await sb.auth.getSession();
+    if (!data.session) return showMsg(navigator.onLine ? '서버 로그인이 끊겼습니다. 오른쪽 위 동기화 단추에서 로그아웃 후 다시 로그인하세요.' : fail({}), true);
+    UID = data.session.user.id;
+    /* 공유받은 폴더 (서버에 공유 규칙이 아직 없으면 없는 것으로 봄) */
+    let grants = [];
+    const g = await gw().from('cloud_grants').select('folder_id,can_write').eq('user_id', UID);
+    if (!g.error) grants = g.data || []; else if (!/cloud_grants|schema cache|does not exist/i.test(g.error.message || '')) throw g.error;
+    let shared = [];
+    if (grants.length) {
+      const r = await gw().from('cloud_items').select(FIELDS).in('id', grants.map(x => x.folder_id)).is('trashed_at', null);
+      if (r.error) throw r.error;
+      shared = (r.data || []).map(it => ({ ...it, write: !!grants.find(x => x.folder_id === it.id).can_write })).sort(byName);
+    }
+    const own = await gw().from('cloud_items').select('id', { count: 'exact', head: true }).eq('owner', UID).is('parent_id', null).is('trashed_at', null);
+    if (own.error) throw own.error;
+    ROOTS = shared.slice();
+    if (own.count) ROOTS.unshift({ id: null, owner: UID, name: '내 파일', is_folder: true, write: true, mine: true });
+    SINGLE = ROOTS.length === 1;
+    const keep = PATH.length && ROOTS.some(r => r.id === PATH[0].id);
+    if (!keep) PATH = SINGLE ? [ROOTS[0]] : [];
+    await load();
+  } catch (e) { console.warn(e); showMsg(fail(e), true); }
+}
+function showMsg(t, retry) {
+  $('rows').hidden = true; $('foot').hidden = true; $('empty').hidden = false; $('emptyT').textContent = t; $('retry').hidden = !retry;
+}
+async function load() {
+  const my = ++LSEQ, c = cur();
+  head();
+  if (!c) { ITEMS = ROOTS; return render(); }
+  showMsg('불러오는 중…');
+  try {
+    let q = gw().from('cloud_items').select(FIELDS).is('trashed_at', null);
+    q = c.id ? q.eq('parent_id', c.id) : q.is('parent_id', null).eq('owner', UID);
+    const { data, error } = await q;
+    if (my !== LSEQ) return;
+    if (error) throw error;
+    ITEMS = (data || []).sort(byName);
+    render();
+  } catch (e) { if (my === LSEQ) { console.warn(e); ITEMS = []; showMsg(fail(e), true); } }
+}
+function head() {
+  const c = cur(), top = PATH.length <= (SINGLE ? 1 : 0);
+  $('upDir').hidden = top;
+  $('cName').textContent = c ? c.name : '클라우드';
+  $('cPath').textContent = c ? ['니움클라우드', ...PATH.slice(0, -1).map(p => p.name)].join(' › ') : '니움클라우드';
+  const w = !!(c && PATH[0].write);
+  $('upBtn').disabled = !w || !!JOB; $('mkBtn').disabled = !w;
+  $('q').value = '';
+}
+function iconOf(it) {
+  if (it.is_folder) return '<span class="ic dir"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>';
+  const k = kind(it);
+  return `<span class="ic ${k}">${esc(k === 'img' ? '사진' : (ext(it.name).toUpperCase().slice(0, 4) || '파일'))}</span>`;
+}
+function render() {
+  const q = $('q').value.trim().toLowerCase();
+  const list = ITEMS.filter(it => !q || String(it.name).toLowerCase().includes(q));
+  $('rows').innerHTML = list.map(it => `<button class="row" data-id="${esc(it.id || '')}" aria-current="${!!(CUR && CUR.id === it.id)}">${iconOf(it)}
+      <span class="nm"><b>${esc(it.name)}</b><span>${it.is_folder ? (it.mine ? '내 니움클라우드' : it.write != null ? (it.write ? '공유 폴더 · 올리기 가능' : '공유 폴더 · 보기만') : day(it.updated_at)) : `${fmtSize(it.size || 0)} · ${day(it.updated_at)}`}</span></span>
+      <span class="go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${it.is_folder ? 'M9 5l7 7-7 7' : 'M12 4v11M7 10l5 5 5-5M5 20h14'}"/></svg></span></button>`).join('');
+  $('rows').hidden = !list.length; $('empty').hidden = !!list.length; $('retry').hidden = true; $('foot').hidden = !list.length;
+  if (!list.length) $('emptyT').textContent = ITEMS.length ? '찾는 이름이 이 폴더에 없습니다.'
+    : cur() ? (PATH[0].write ? '빈 폴더입니다. 「올리기」로 파일을 넣을 수 있습니다.' : '빈 폴더입니다.')
+    : '이 계정으로 볼 수 있는 클라우드 폴더가 없습니다. 니움클라우드(admin)에서 현장 폴더를 이 계정에 공유해야 합니다.';
+}
+$('q').addEventListener('input', render);
+$('rows').addEventListener('click', e => {
+  const b = e.target.closest('.row'); if (!b) return;
+  const it = ITEMS.find(x => (x.id || '') === b.dataset.id); if (!it) return;
+  if (it.is_folder) { PATH.push(PATH.length ? { ...it, write: PATH[0].write } : it); load(); } else openFile(it);
+});
+$('upDir').onclick = () => { PATH.pop(); load(); };
+$('reload').onclick = () => start();
+$('retry').onclick = () => start();
+addEventListener('online', () => { if (!$('retry').hidden) start(); });
+
+/* ---------- 파일 보기 ---------- */
+async function openFile(it) {
+  CUR = it; CURBLOB = null; const my = ++SEQ;
+  document.body.classList.add('viewing');
+  $('vNone').hidden = true; $('vHead').hidden = false; $('pv').hidden = false; $('vFoot').hidden = false;
+  $('vName').textContent = it.name; $('vMeta').textContent = `${fmtSize(it.size || 0)} · ${day(it.updated_at)}`;
+  $('vOpen').disabled = $('vSave').disabled = true;
+  render();
+  if ((it.size || 0) > MAXOPEN) return pvMsg('150MB가 넘는 파일은 앱에서 받을 수 없습니다.<br>PC의 니움클라우드(gw.worknium.co.kr/cloud)에서 받으세요.');
+  pvMsg(`파일을 받는 중… (${fmtSize(it.size || 0)})`);
+  const { data, error } = await sb.storage.from(BUCKET).download(`${it.owner}/${it.id}`).catch(e => ({ error: e }));
+  if (my !== SEQ) return;
+  if (error || !data) return pvMsg(esc(fail(error || '파일을 받지 못했습니다')), false, () => openFile(it));
+  CURBLOB = new Blob([data], { type: it.mime && it.mime !== 'application/octet-stream' ? it.mime : mimeOf(it.name) });
+  $('vOpen').disabled = $('vSave').disabled = false;
+  await previewBlob(it, CURBLOB, my);
+}
+function closeView() { CUR = null; CURBLOB = null; ++SEQ; document.body.classList.remove('viewing'); stopPdf(); $('pv').innerHTML = ''; $('vNone').hidden = false; $('vHead').hidden = true; $('pv').hidden = true; $('vFoot').hidden = true; render(); }
+$('vBack').onclick = closeView;
+$('vOpen').onclick = async () => { if (!CUR || !CURBLOB) return; try { await openExternal(CUR.name, CURBLOB, CURBLOB.type); } catch (e) { toast('열지 못했습니다: ' + (e && e.message || e)); } };
+$('vSave').onclick = async () => {
+  if (!CUR || !CURBLOB) return;
+  try { await STORE.downloads.save({ filename: safeName(CUR.name), data: CURBLOB }); toast(native() ? '문서/공릉천교 폴더에 저장했습니다' : '내려받았습니다'); }
+  catch (e) { toast('저장하지 못했습니다: ' + (e && e.message || e)); }
+};
+
+/* ---------- 새 폴더 ---------- */
+const cleanName = n => String(n || '').replace(/[\\/]+/g, '_').trim().slice(0, 200);
+function uniqueName(name, taken) {
+  if (!taken.has(name.toLowerCase())) return name;
+  const m = name.match(/^(.*?)(\.[^.]+)?$/), base = m[1], e = m[2] || '';
+  for (let i = 1; ; i++) { const n = `${base} (${i})${e}`; if (!taken.has(n.toLowerCase())) return n; }
+}
+$('mkBtn').onclick = () => { $('mkName').value = ''; $('mkOv').hidden = false; setTimeout(() => $('mkName').focus(), 50); };
+$('mkClose').onclick = () => $('mkOv').hidden = true;
+$('mkOv').addEventListener('click', e => { if (e.target.id === 'mkOv') $('mkOv').hidden = true; });
+$('mk').onsubmit = async e => {
+  e.preventDefault();
+  const c = cur(), name = cleanName($('mkName').value); if (!c || !name) return;
+  if (ITEMS.some(it => String(it.name).toLowerCase() === name.toLowerCase())) return toast('같은 이름이 이미 있습니다.');
+  const { error } = await gw().from('cloud_items').insert({ owner: c.owner, parent_id: c.id, name, is_folder: true });
+  if (error) return toast('만들지 못했습니다: ' + fail(error));
+  $('mkOv').hidden = true; toast('폴더를 만들었습니다'); load();
+};
+
+/* ---------- 올리기: 6MB 이하는 한 번에, 넘으면 6MB 조각으로 (끊겨도 이어서 다시 시도) ---------- */
+let JOB = null;   // {cancel()}
+async function token() { const { data } = await sb.auth.getSession(); if (!data.session) throw new Error('서버 로그인이 끊겼습니다'); return data.session.access_token; }
+function putFile(file, path, contentType, onProgress) {
+  if (file.size <= CHUNK || !window.tus) {
+    let dead = false;
+    return { done: sb.storage.from(BUCKET).upload(path, file, { contentType, upsert: false }).then(r => { if (r.error) throw r.error; if (dead) throw new Error('취소함'); onProgress(file.size); }), cancel: () => { dead = true; } };
+  }
+  let up = null, bad = null;
+  const done = new Promise((ok, no) => {
+    bad = no;
+    up = new tus.Upload(file, {
+      endpoint: `${CFG.supabaseUrl}/storage/v1/upload/resumable`, chunkSize: CHUNK, retryDelays: [0, 3000, 5000, 10000, 20000],
+      uploadDataDuringCreation: true, storeFingerprintForResuming: false,
+      headers: { apikey: CFG.supabaseKey, 'x-upsert': 'false' },
+      metadata: { bucketName: BUCKET, objectName: path, contentType, cacheControl: '3600' },
+      onBeforeRequest: async req => { req.setHeader('authorization', 'Bearer ' + await token()); },
+      onProgress: sent => onProgress(sent), onError: err => no(err), onSuccess: () => ok(),
+    });
+    up.start();
+  });
+  return { done, cancel: () => { try { up.abort(true); } catch (e) {} bad(new Error('취소함')); } };
+}
+$('upBtn').onclick = () => $('upInput').click();
+$('upInput').onchange = async e => {
+  const files = [...e.target.files]; e.target.value = '';
+  const c = cur(); if (!files.length || !c || JOB) return;
+  const total = files.reduce((s, f) => s + f.size, 0); let sentBefore = 0, ok = 0, stop = false, err = null;
+  const taken = new Set(ITEMS.map(it => String(it.name).toLowerCase()));
+  $('up').hidden = false; $('upBtn').disabled = true; $('upBar').style.width = '0';
+  for (let i = 0; i < files.length && !stop; i++) {
+    const f = files[i], id = crypto.randomUUID(), path = `${c.owner}/${id}`, ct = f.type || mimeOf(f.name);
+    $('upName').textContent = '올리는 중 · ' + f.name; $('upCnt').textContent = `${i + 1} / ${files.length}`;
+    try {
+      const j = putFile(f, path, ct, sent => { $('upBar').style.width = (total ? (sentBefore + sent) / total * 100 : 100) + '%'; });
+      JOB = { cancel: () => { stop = true; j.cancel(); } };
+      await j.done;
+      const name = uniqueName(cleanName(f.name) || '파일', taken); taken.add(name.toLowerCase());
+      const r = await gw().from('cloud_items').insert({ id, owner: c.owner, parent_id: c.id, name, size: f.size, mime: ct });
+      if (r.error) { sb.storage.from(BUCKET).remove([path]).catch(() => {}); throw r.error; }
+      ok++; sentBefore += f.size;
+    } catch (x) { if (!stop) err = x; stop = true; }
+  }
+  JOB = null; $('up').hidden = true;
+  toast(err ? `올리지 못했습니다 (${ok}개 올림): ${fail(err)}` : ok < files.length ? `취소했습니다 (${ok}개 올림)` : `${ok}개를 올렸습니다`);
+  if (cur() === c) load(); else head();
+};
+$('upCancel').onclick = () => JOB && JOB.cancel();
+
+/* 안드로이드 뒤로 가기 */
+window.CLOUD = {
+  back() {
+    if (!$('mkOv').hidden) { $('mkOv').hidden = true; return true; }
+    if (document.body.classList.contains('viewing') && !matchMedia('(min-width:900px)').matches) { closeView(); return true; }
+    if (PATH.length > (SINGLE ? 1 : 0)) { PATH.pop(); load(); return true; }
+    return false;
+  },
+};
+start();
+</script>
+<script src="vendor/tus.min.js"></script>
+</body>
+</html>

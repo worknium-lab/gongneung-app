@@ -300,7 +300,7 @@
       const refs = new Set();
       colMap('photos').forEach(p => { if (p && p.img) refs.add(p.img); if (p && p.th) refs.add(p.th); });
       colMap('dwg').forEach(d => { if (d && d.img) refs.add(d.img); if (d && d.th) refs.add(d.th); });
-      colMap('subm').forEach(d => { ((d && d.files) || []).forEach(f => f && f.id && refs.add(f.id)); });
+      ['subm', 'gisung', 'jungong'].forEach(c => colMap(c).forEach(d => { ((d && d.files) || []).forEach(f => f && f.id && refs.add(f.id)); }));
       const have = await serverFiles(BUCKET);
       if ([...refs].some(id => id[0] === 'f')) (await serverFiles('files')).forEach(k => have.add(k));
       const inQ = new Set((await getAll('blobq')).map(j => j.id));
@@ -414,6 +414,7 @@
     syncNow: () => kick(true),
     checkFiles: () => { healing = true; kick(true); },
     status,
+    sb,                                  // 클라우드 탭이 니움클라우드(groupware)를 읽고 쓸 때 씀
     db, assets, downloads, user,
     async setName(name) { const id = myId(); if (!id) return; const cur = colMap('users').get(id) || {}; await write('users', id, { ...cur, name }); },
     myName: () => { const u = colMap('users').get(myId()); return (u && u.name) || ''; },

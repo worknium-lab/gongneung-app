@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>공릉천교 제출서류</title>
 <link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/fileview.css">
 <script>
 window.EMBED = window.parent !== window;
 if (window.EMBED && window.parent.claude) window.claude = window.parent.claude;
@@ -39,9 +40,6 @@ button{cursor:pointer}
 /* 상태 · 파일 종류 표시 */
 .pill{font-size:12px;font-weight:600;padding:2px 9px;border-radius:11px;white-space:nowrap;display:inline-block;line-height:1.5}
 .pill.plan{background:var(--plan-bg);color:var(--plan)} .pill.work{background:var(--work-bg);color:var(--work)} .pill.done{background:var(--done-bg);color:var(--done)}
-.ft{font-family:var(--f-num);font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:5px;line-height:1.5;white-space:nowrap;display:inline-block}
-.ft.pdf{background:#f6dedc;color:#9a241d} .ft.xls{background:#dcefe3;color:#1f6b3f} .ft.hwp{background:#d9e7f0;color:#1d5d86}
-.ft.img{background:#ebe3f4;color:#5b3d8a} .ft.etc{background:var(--sunk);color:var(--ink2)}
 
 /* ---------- 틀: 폰은 목록 ↔ 보기 전환, 넓은 화면(탭 가로)은 나란히 ---------- */
 #app{height:100%;display:flex}
@@ -72,6 +70,27 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 .filters button[data-f="work"][aria-pressed="true"]{background:var(--work);border-color:var(--work)}
 .filters button[data-f="done"][aria-pressed="true"]{background:var(--done);border-color:var(--done)}
 .srow{display:flex;gap:8px}
+/* 기성: 회차 단추 줄 / 기성·준공: 진행 요약 */
+.rbar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;width:100%}
+.rbar::-webkit-scrollbar{display:none}
+.rbar button{appearance:none;flex:none;height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:var(--surface);color:var(--ink2);font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:4px}
+.rbar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.rbar button.add{border:1px dashed var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:600;padding:0 14px}
+.rbar button svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4}
+.sum{border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;width:100%}
+.sum .st{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sum .st b{font-size:16px}
+.sum .sd{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.sum .sd input{height:36px;border:1px solid var(--line);border-radius:8px;padding:0 8px;font-family:var(--f-num);font-size:13px;background:#fff;color:var(--fg)}
+.sum.j .sd{order:3;flex-basis:100%}
+.sum .st .btn{height:36px;font-size:12px;padding:0 10px;margin-left:auto}
+.sum .cnt{margin-left:auto;font-family:var(--f-num);font-size:20px;font-weight:600;color:var(--done)}
+.sum .cnt small{font-size:13px;color:var(--muted);font-weight:500}
+.sum .pbar{height:8px;border-radius:4px;background:var(--sunk);overflow:hidden;display:flex}
+.sum .pbar i{display:block;height:100%} .sum .pbar .d{background:#2f7d4f} .sum .pbar .w{background:#c26b12}
+.sum .lg{display:flex;gap:12px;font-size:12px;color:var(--ink2);flex-wrap:wrap}
+.sum .lg .d{color:var(--done);font-weight:600} .sum .lg .w{color:var(--work);font-weight:600}
+#seedBtn{margin:12px auto 0;display:flex}
 .search{flex:1;display:flex;align-items:center;gap:8px;height:44px;border-radius:10px;background:var(--sunk);padding:0 12px;min-width:0}
 .search svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex:none}
 .search input{border:0;background:transparent;outline:none;font-size:14px;flex:1;min-width:0}
@@ -128,31 +147,6 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 .fchips button{appearance:none;flex:none;height:40px;border-radius:20px;border:1px solid var(--line);background:var(--surface);padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;max-width:220px}
 .fchips button em{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fchips button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:#fff;font-weight:600}
-#pv{flex:1;min-height:0;position:relative;background:#5b6871;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
-#pv.light{background:var(--bg)}
-.pvmsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px;text-align:center;color:#fff;font-size:14px}
-#pv.light .pvmsg{color:var(--muted)}
-.pages{display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px 0;min-width:100%;width:max-content;margin:0 auto}
-.pages .pg{background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.25);position:relative}
-.pages .pg canvas,.pages .pg img{display:block;width:100%;height:100%}
-.zoombar{position:absolute;right:10px;bottom:10px;display:flex;gap:6px;z-index:2}
-.zoombar button{appearance:none;width:44px;height:44px;border-radius:22px;border:0;background:rgba(22,32,39,.86);color:#fff;font-size:20px;line-height:1}
-.pgno{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(22,32,39,.86);color:#fff;border-radius:16px;padding:4px 12px;font-family:var(--f-num);font-size:12px;z-index:2;pointer-events:none;white-space:nowrap}
-.sheetTabs{position:sticky;left:0;top:0;z-index:1;display:flex;gap:4px;padding:8px;background:var(--bg);overflow-x:auto;border-bottom:1px solid var(--line)}
-.sheetTabs button{appearance:none;flex:none;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);padding:0 10px;font-size:12px}
-.sheetTabs button[aria-pressed="true"]{background:var(--fg);color:#fff;border-color:var(--fg);font-weight:600}
-.xl{padding:8px}
-.xl table{border-collapse:collapse;background:#fff;font-size:12px}
-.xl td,.xl th{border:1px solid #c9d2d8;padding:4px 6px;white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;height:26px}
-.xl .rh{background:var(--sunk);color:var(--muted);font-family:var(--f-num);font-size:11px;text-align:center;position:sticky;left:0}
-.xl .more{font-size:12px;color:var(--muted);padding:8px 2px}
-.hw{background:#fff;max-width:760px;margin:14px auto;padding:28px 26px;box-shadow:0 2px 10px rgba(0,0,0,.18);font-size:14px;line-height:1.6;color:#111}
-.hw p{margin:0;min-height:1.6em;white-space:pre-wrap;word-break:keep-all}
-.hw table{border-collapse:collapse;margin:6px 0;width:100%;font-size:12.5px}
-.hw td{border:1px solid #555;padding:3px 5px;vertical-align:top}
-.hw td p{min-height:1.2em}
-.hw img{max-width:100%;height:auto;display:block;margin:6px 0}
-.hw hr{border:0;border-top:1px dashed #9aa6ad;margin:22px -26px}
 .phgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;padding:10px}
 .phgrid button{appearance:none;border:0;padding:0;background:#c9d2d8;aspect-ratio:1;border-radius:6px;overflow:hidden;position:relative}
 .phgrid button img{width:100%;height:100%;object-fit:cover;display:block}
@@ -210,7 +204,13 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 <div id="app">
   <section id="listPane" aria-label="제출서류 목록">
     <div class="lhead">
-      <div class="filters" role="group" aria-label="상태로 보기">
+      <div class="rbar" id="rbar" role="group" aria-label="기성 회차" hidden></div>
+      <div class="sum" id="sum" hidden>
+        <div class="st"><b id="sumT"></b><label class="sd"><span id="sumDL"></span><input type="date" id="sumD"></label><span class="cnt" id="sumC" hidden></span><button class="btn danger" id="rDel" hidden>회차 삭제</button></div>
+        <div class="pbar"><i class="d" id="pbD"></i><i class="w" id="pbW"></i></div>
+        <div class="lg" id="sumL"></div>
+      </div>
+      <div class="filters" id="filters" role="group" aria-label="상태로 보기">
         <button data-f="all" aria-pressed="true"><span>전체</span><b id="cAll">0</b></button>
         <button data-f="plan" aria-pressed="false"><span>작성예정</span><b id="cPlan">0</b></button>
         <button data-f="work" aria-pressed="false"><span>작성중</span><b id="cWork">0</b></button>
@@ -222,9 +222,10 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
       </div>
     </div>
     <div id="lBody">
-      <div class="thead"><span>No.</span><span>제출서류명</span><span class="c-files">첨부</span><span class="c-st">상태</span><span>날짜</span></div>
+      <div class="thead"><span>No.</span><span id="thName">제출서류명</span><span class="c-files">첨부</span><span class="c-st">상태</span><span>날짜</span></div>
       <div class="tbl" id="rows"></div>
       <div class="empty" id="empty" hidden></div>
+      <button class="btn dash" id="seedBtn" hidden></button>
       <p class="note" style="padding:10px 4px">날짜: 제출완료는 제출일, 작성예정·작성중은 예정일 (지난 예정일은 빨간색)</p>
     </div>
   </section>
@@ -255,7 +256,7 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
     <div class="hd"><h2 id="edTitle">서류 추가</h2><button type="button" class="ico" id="edClose" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="two">
       <label class="fld">No.<input id="fNo" class="num" inputmode="numeric"></label>
-      <label class="fld">제출서류명<input id="fName" required maxlength="120"></label>
+      <label class="fld"><span id="fNameL">제출서류명</span><input id="fName" required maxlength="120"></label>
     </div>
     <fieldset style="border:0;margin:0;padding:0">
       <legend class="fld" style="padding:0;margin-bottom:4px">상태</legend>
@@ -290,39 +291,34 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 <div class="busy" id="busy" hidden></div>
 
 <script src="vendor/jszip.min.js"></script>
+<script src="js/fileview.js"></script>
 <script>
-'use strict';
-const $ = id => document.getElementById(id);
-const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const rid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 const ST = { plan: '작성예정', work: '작성중', done: '제출완료' };
 const MAXB = 50 * 1024 * 1024;
 let db = null, assets = null, dls = null, me = null;
 let DOCS = [], PHOTOS = [], PHMAP = {}, FILTER = 'all', CUR = null, CURF = null;
+/* 같은 화면을 세 탭이 씀: 제출서류(subm) · 기성(gisung, 회차별) · 준공(jungong, 점검표). 주소 뒤 ?c= 로 고름 */
+const MODE = ['gisung', 'jungong'].includes(new URLSearchParams(location.search).get('c')) ? new URLSearchParams(location.search).get('c') : 'subm';
+const COL = MODE;
+const WORD = { subm: '제출서류', gisung: '기성 서류', jungong: '준공 서류' }[MODE];
+const G_PRESET = ['기성부분 검사원', '기성 내역서', '기성부분 사진대지', '공정 현황 (공정률)', '노무비 지급 확인서', '세금계산서'];
+const J_PRESET = ['준공계 (준공신고서)', '준공검사원', '준공 내역서 (정산)', '준공 사진첩 (전 · 중 · 후)', '준공 도면', '품질시험 성과 총괄표', '주요 자재 검수 · 사용 내역', '안전관리비 사용내역', '건설폐기물 처리 실적', '하자보수보증서', '노무비 완납 확인서', '시설물 인수인계서'];
+let ALL = [], ROUND = 0, RINFO = {}, JCFG = {};
+try { ROUND = +localStorage.getItem('gn-gisung-round') || 0; } catch (e) {}
+const roundOf = d => +d.round || 1;
+function rounds() { const s = new Set(Object.keys(RINFO).map(Number)); ALL.forEach(d => s.add(roundOf(d))); return [...s].filter(n => n > 0).sort((a, b) => a - b); }
+function scope() {
+  if (MODE !== 'gisung') { DOCS = ALL; return; }
+  const rs = rounds();
+  if (!rs.includes(ROUND)) ROUND = rs.length ? rs[rs.length - 1] : 0;
+  DOCS = ALL.filter(d => roundOf(d) === ROUND);
+}
 let toastT = 0;
 function toast(t) { const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 2600); }
 function busy(t) { $('busy').hidden = !t; $('busy').textContent = t || ''; }
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
-const fmtSize = b => b >= 1048576 ? (b / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(b / 1024)) + 'KB';
-function loadScript(src) { return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('불러오기 실패: ' + src)); document.head.append(s); }); }
 
-/* ---------- 파일 종류 ---------- */
-const ext = n => (String(n).match(/\.([a-z0-9]+)$/i) || [, ''])[1].toLowerCase();
-function kind(f) {
-  if (f.photo) return 'img';
-  const e = ext(f.name);
-  if (e === 'pdf') return 'pdf';
-  if (['xlsx', 'xls', 'xlsm', 'xlsb', 'csv', 'ods'].includes(e)) return 'xls';
-  if (e === 'hwpx' || e === 'hwp') return 'hwp';
-  if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(e)) return 'img';
-  return 'etc';
-}
-function label(f) { const e = ext(f.name).toUpperCase(); const k = kind(f); return k === 'img' ? '사진' : (e || '파일'); }
-const MIME = { pdf: 'application/pdf', xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', xls: 'application/vnd.ms-excel', xlsm: 'application/vnd.ms-excel.sheet.macroEnabled.12', csv: 'text/csv',
-  hwpx: 'application/haansofthwpx', hwp: 'application/x-hwp', docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', doc: 'application/msword',
-  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp', zip: 'application/zip', dwg: 'application/acad', txt: 'text/plain' };
-const mimeOf = n => MIME[ext(n)] || 'application/octet-stream';
-const chip = f => `<span class="ft ${kind(f)}">${esc(label(f))}</span>`;
 function chipsOf(d) {
   const fs = (d.files || []).map(chip);
   const n = (d.photos || []).length;
@@ -338,6 +334,7 @@ function sorted() { return DOCS.slice().sort((a, b) => (+a.no || 9999) - (+b.no 
 function renderList() {
   const c = { all: DOCS.length, plan: 0, work: 0, done: 0 };
   DOCS.forEach(d => c[d.status] = (c[d.status] || 0) + 1);
+  renderSum(c);
   $('cAll').textContent = c.all; $('cPlan').textContent = c.plan; $('cWork').textContent = c.work; $('cDone').textContent = c.done;
   document.querySelectorAll('.filters button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.f === FILTER)));
   const q = $('q').value.trim().toLowerCase();
@@ -353,8 +350,91 @@ function renderList() {
   $('rows').querySelectorAll('.dt').forEach(e => { e.querySelector('.d-s').hidden = wide; e.querySelector('.d-l').hidden = !wide; if (wide) e.firstChild.textContent = ''; });
   $('rows').hidden = !rows.length;
   $('empty').hidden = !!rows.length;
-  $('empty').textContent = DOCS.length ? '조건에 맞는 서류가 없습니다.' : '등록된 제출서류가 없습니다. 「추가」를 눌러 서류를 등록하세요.';
+  $('empty').textContent = DOCS.length ? '조건에 맞는 서류가 없습니다.'
+    : MODE === 'gisung' ? (ROUND ? `${ROUND}회 기성에 등록된 서류가 없습니다. 「추가」를 눌러 서류를 등록하세요.` : '아직 기성 회차가 없습니다. 위의 「회차 추가」를 누르면 1회 기성과 기본 서류 6건이 만들어집니다.')
+    : MODE === 'jungong' ? '등록된 준공 서류가 없습니다. 아래 단추로 기본 목록을 넣거나, 「추가」로 하나씩 등록하세요.'
+    : '등록된 제출서류가 없습니다. 「추가」를 눌러 서류를 등록하세요.';
+  $('seedBtn').hidden = !(MODE === 'jungong' && !ALL.length);
+  $('addBtn').disabled = MODE === 'gisung' && !ROUND;
 }
+/* 기성 회차 단추 + 진행 요약 (기성 · 준공) */
+function renderSum(c) {
+  if (MODE === 'subm') return;
+  if (MODE === 'gisung') {
+    $('rbar').innerHTML = rounds().map(n => `<button data-r="${n}" aria-pressed="${n === ROUND}">${n}회</button>`).join('')
+      + '<button class="add" data-r="add"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>회차 추가</button>';
+    const on = $('rbar').querySelector('[aria-pressed="true"]'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  $('sum').hidden = MODE === 'gisung' && !ROUND;
+  $('sumT').textContent = MODE === 'gisung' ? `${ROUND}회 기성` : `준공 서류 ${c.all}건`;
+  const dv = MODE === 'gisung' ? ((RINFO[ROUND] || {}).date || '') : (JCFG.date || '');
+  if (document.activeElement !== $('sumD')) $('sumD').value = dv;
+  $('pbD').style.width = (c.all ? c.done / c.all * 100 : 0) + '%';
+  $('pbW').style.width = (c.all ? c.work / c.all * 100 : 0) + '%';
+  if (MODE === 'jungong') { $('sumC').innerHTML = `${c.done}<small> / ${c.all}</small>`; $('sumL').innerHTML = ''; $('sumL').hidden = true; }
+  else $('sumL').innerHTML = `<span>서류 ${c.all}건</span><span class="d">제출완료 ${c.done}</span><span class="w">작성중 ${c.work}</span><span>작성예정 ${c.plan}</span>`;
+}
+function armed(b, label) {   // 두 번 눌러야 지움
+  if (b.classList.contains('arm')) return true;
+  b.classList.add('arm'); const t = b.textContent; b.textContent = label;
+  setTimeout(() => { b.classList.remove('arm'); b.textContent = t; }, 3000);
+  return false;
+}
+async function seed(col, names, extra, idOf) {   // 기본 서류 넣기: 문서 이름표(id)를 정해 둬서 두 기기가 같이 눌러도 겹치지 않음
+  for (let i = 0; i < names.length; i++) {
+    const id = idOf(i + 1);
+    if (ALL.some(d => d.id === id)) continue;
+    await db.doc(col + '/' + id).set({ no: i + 1, name: names[i], status: 'plan', date: '', memo: '', files: [], photos: [], at: Date.now(), by: me, created: Date.now(), ...extra });
+  }
+}
+$('rbar').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.r !== 'add') { ROUND = +b.dataset.r; }
+  else {
+    const rs = rounds(), n = (rs.length ? rs[rs.length - 1] : 0) + 1;
+    busy(`${n}회 기성을 만드는 중…`);
+    try {
+      await db.doc('gisungr/r' + n).set({ n, date: '', at: Date.now(), by: me });
+      RINFO[n] = { n, date: '' };
+      await seed('gisung', G_PRESET, { round: n }, i => `g${n}_${i}`);
+      ROUND = n; toast(`${n}회 기성과 기본 서류 ${G_PRESET.length}건을 만들었습니다`);
+    } catch (err) { toast('만들지 못했습니다: ' + (err && err.message || err)); }
+    busy('');
+  }
+  try { localStorage.setItem('gn-gisung-round', ROUND); } catch (err) {}
+  if (CUR) closeView();
+  scope(); renderList();
+};
+$('sumD').onchange = async () => {
+  const date = $('sumD').value || '';
+  try {
+    if (MODE === 'gisung') { if (!ROUND) return; RINFO[ROUND] = { ...(RINFO[ROUND] || {}), n: ROUND, date }; await db.doc('gisungr/r' + ROUND).set({ ...RINFO[ROUND], at: Date.now(), by: me }); }
+    else { JCFG = { ...JCFG, date }; await db.doc('config/jungong').set({ ...JCFG, at: Date.now(), by: me }); }
+    toast(date ? '날짜를 저장했습니다' : '날짜를 지웠습니다');
+  } catch (err) { toast('저장하지 못했습니다: ' + (err && err.message || err)); }
+};
+$('rDel').onclick = async () => {
+  if (!ROUND) return;
+  const mine = ALL.filter(d => roundOf(d) === ROUND);
+  if (!armed($('rDel'), mine.length ? `서류 ${mine.length}건도 함께 삭제` : '한 번 더 누르면 삭제')) return;
+  const n = ROUND;
+  busy('지우는 중…');
+  try {
+    for (const d of mine) { for (const f of d.files || []) { try { await assets.delete(f.id); } catch (err) {} } await db.doc('gisung/' + d.id).delete(); }
+    if (RINFO[n]) { await db.doc('gisungr/r' + n).delete(); delete RINFO[n]; }
+    ALL = ALL.filter(d => roundOf(d) !== n);
+    $('rDel').classList.remove('arm'); $('rDel').textContent = '회차 삭제';
+    if (CUR) closeView();
+    scope(); renderList(); toast(`${n}회 기성을 지웠습니다`);
+  } catch (err) { toast('지우지 못했습니다: ' + (err && err.message || err)); }
+  busy('');
+};
+$('seedBtn').onclick = async () => {
+  busy('기본 목록을 넣는 중…');
+  try { await seed('jungong', J_PRESET, {}, i => 'j_' + i); toast(`기본 준공 서류 ${J_PRESET.length}건을 넣었습니다`); }
+  catch (err) { toast('넣지 못했습니다: ' + (err && err.message || err)); }
+  busy('');
+};
 document.querySelector('.filters').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; FILTER = b.dataset.f; renderList(); });
 $('q').addEventListener('input', renderList);
 $('rows').addEventListener('click', e => { const b = e.target.closest('.tr'); if (b) openDoc(b.dataset.id); });
@@ -387,18 +467,11 @@ $('vChips').addEventListener('click', e => { const b = e.target.closest('button'
 $('vBack').onclick = () => closeView();
 $('vEdit').onclick = () => CUR && openEdit(CUR);
 function closeView() { CUR = null; CURF = null; document.body.classList.remove('viewing'); stopPdf(); $('pv').innerHTML = ''; $('vNone').hidden = false; $('vHead').hidden = true; $('pv').hidden = true; $('vFoot').hidden = true; renderList(); }
-function pvMsg(html, light, retry) {
-  stopPdf();
-  $('pv').className = light ? 'light' : '';
-  $('pv').innerHTML = `<div class="pvmsg"><div>${html}</div>${retry ? '<button class="btn" id="pvRetry">다시 받기</button>' : ''}</div>`;
-  if (retry) $('pvRetry').onclick = retry;
-}
 async function getBlob(f) {
   const b = await assets.blob(f.id);
   if (!b) return null;
   return b.type === mimeOf(f.name) ? b : new Blob([b], { type: f.type || mimeOf(f.name) });
 }
-let SEQ = 0;
 async function showFile(fid) {
   const d = CUR; if (!d) return;
   const f = filesOf(d).find(x => x.id === fid); if (!f) return;
@@ -412,205 +485,7 @@ async function showFile(fid) {
   try { blob = await getBlob(f); } catch (e) { blob = null; }
   if (my !== SEQ) return;
   if (!blob) return pvMsg('이 파일을 아직 받지 못했습니다.<br>인터넷 연결을 확인하거나, 파일을 올린 기기에서 앱을 열어 두면 서버로 올라갑니다.', false, () => showFile(fid));
-  const k = kind(f);
-  try {
-    if (k === 'pdf') await showPdf(blob, my);
-    else if (k === 'xls') await showXls(blob, my);
-    else if (k === 'hwp' && ext(f.name) === 'hwpx') await showHwpx(blob, my);
-    else if (k === 'img') showImg(URL.createObjectURL(blob));
-    else pvMsg(`${esc(label(f))} 파일은 앱 안에서 미리 볼 수 없습니다.<br>아래 「다른 앱으로 열기」를 누르세요.`);
-  } catch (e) {
-    console.warn(e);
-    if (my === SEQ) pvMsg('미리보기를 만들지 못했습니다 (' + esc(e && e.message || e) + ').<br>「다른 앱으로 열기」로 열어 보세요.');
-  }
-}
-
-/* PDF: 쪽마다 화면 폭에 맞춰 그림. 두 손가락·버튼으로 확대 */
-let PDF = null, PDFOBS = null, ZOOM = 1, ZT = 0;
-function stopPdf() { if (PDFOBS) PDFOBS.disconnect(); PDFOBS = null; if (PDF) { try { PDF.destroy(); } catch (e) {} } PDF = null; ZOOM = 1; }
-async function pdfLib() {
-  if (!window.pdfjsLib) { await loadScript('vendor/pdf.min.js'); window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdf.worker.min.js'; }
-  return window.pdfjsLib;
-}
-async function showPdf(blob, my) {
-  const lib = await pdfLib();
-  const doc = await lib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()), cMapUrl: new URL('vendor/cmaps/', location.href).href, cMapPacked: true, standardFontDataUrl: new URL('vendor/standard_fonts/', location.href).href }).promise;
-  if (my !== SEQ) { doc.destroy(); return; }
-  stopPdf(); PDF = doc;
-  const pv = $('pv'); pv.className = '';
-  const sizes = [];
-  for (let i = 1; i <= doc.numPages; i++) { const p = await doc.getPage(i); const v = p.getViewport({ scale: 1 }); sizes.push([v.width, v.height]); if (my !== SEQ) return; }
-  pv.innerHTML = `<div class="pages" id="pages">${sizes.map((s, i) => `<div class="pg" data-i="${i + 1}" data-r="${s[1] / s[0]}"></div>`).join('')}</div>
-    <div class="pgno" id="pgno">1 / ${doc.numPages} 쪽</div>
-    <div class="zoombar"><button aria-label="축소" data-z="-1">−</button><button aria-label="확대" data-z="1">+</button></div>`;
-  layoutPages();
-  PDFOBS = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) renderPage(e.target); }), { root: pv, rootMargin: '600px 0px' });
-  pv.onscroll = () => { if (!PDF) return; const mid = pv.getBoundingClientRect().top + pv.clientHeight / 2; let cur = 1; pv.querySelectorAll('.pg').forEach(p => { if (p.getBoundingClientRect().top <= mid) cur = +p.dataset.i; }); const e = $('pgno'); if (e) e.textContent = `${cur} / ${doc.numPages} 쪽`; };
-  pv.querySelectorAll('.pg').forEach(p => PDFOBS.observe(p));
-  bindZoom(true);
-}
-function baseW() { return Math.min($('pv').clientWidth - 24, 1100); }
-function layoutPages() {
-  const w = baseW() * ZOOM;
-  $('pv').querySelectorAll('.pg').forEach(p => { p.style.width = w + 'px'; p.style.height = (w * +p.dataset.r) + 'px'; });
-}
-async function renderPage(el) {
-  if (!PDF) return;
-  const want = Math.round(el.clientWidth * Math.min(window.devicePixelRatio || 1, 2.5));
-  if (+el.dataset.done >= want || el.dataset.busy) return;
-  el.dataset.busy = '1';
-  const doc = PDF;
-  try {
-    const page = await doc.getPage(+el.dataset.i);
-    const v1 = page.getViewport({ scale: 1 });
-    let sc = want / v1.width; if (v1.width * sc * v1.height * sc > 16e6) sc = Math.sqrt(16e6 / (v1.width * v1.height));
-    const vp = page.getViewport({ scale: sc });
-    const cv = document.createElement('canvas'); cv.width = Math.round(vp.width); cv.height = Math.round(vp.height);
-    await page.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
-    if (doc !== PDF) return;
-    el.replaceChildren(cv); el.dataset.done = String(want);
-  } catch (e) { console.warn(e); }
-  delete el.dataset.busy;
-}
-function setZoom(z, cx, cy) {
-  const pv = $('pv'), old = ZOOM;
-  ZOOM = Math.max(1, Math.min(6, z));
-  if (ZOOM === old) return;
-  const r = pv.getBoundingClientRect();
-  const ox = cx == null ? pv.clientWidth / 2 : cx - r.left, oy = cy == null ? pv.clientHeight / 2 : cy - r.top;
-  const ax = (pv.scrollLeft + ox) / old, ay = (pv.scrollTop + oy) / old;
-  if (PDF) layoutPages(); else { const im = pv.querySelector('.pg'); if (im) { im.style.width = baseW() * ZOOM + 'px'; im.style.height = baseW() * ZOOM * +im.dataset.r + 'px'; } }
-  pv.scrollLeft = ax * ZOOM - ox; pv.scrollTop = ay * ZOOM - oy;
-  clearTimeout(ZT); ZT = setTimeout(() => { if (PDF) pv.querySelectorAll('.pg').forEach(p => { const b = p.getBoundingClientRect(); if (b.bottom > r.top - 600 && b.top < r.bottom + 600) renderPage(p); }); }, 250);
-}
-let pinch = null;
-function bindZoom() {
-  const pv = $('pv');
-  pv.querySelector('.zoombar').onclick = e => { const b = e.target.closest('button'); if (b) setZoom(ZOOM * (b.dataset.z > 0 ? 1.4 : 1 / 1.4)); };
-}
-$('pv').addEventListener('touchstart', e => {
-  if (e.touches.length === 2 && $('pv').querySelector('.pg')) {
-    const [a, b] = e.touches; pinch = { d: Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY), z: ZOOM };
-  }
-}, { passive: true });
-$('pv').addEventListener('touchmove', e => {
-  if (!pinch || e.touches.length !== 2) return;
-  e.preventDefault();
-  const [a, b] = e.touches, d = Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
-  setZoom(pinch.z * d / pinch.d, (a.clientX + b.clientX) / 2, (a.clientY + b.clientY) / 2);
-}, { passive: false });
-$('pv').addEventListener('touchend', e => { if (e.touches.length < 2) pinch = null; });
-$('pv').addEventListener('wheel', e => { if ((e.ctrlKey || e.metaKey) && $('pv').querySelector('.pg')) { e.preventDefault(); setZoom(ZOOM * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY); } }, { passive: false });
-addEventListener('resize', () => { if ($('pv').querySelector('.pg')) { if (PDF) layoutPages(); else setZoom(ZOOM + 1e-9); } });
-
-function showImg(url) {
-  stopPdf();
-  const pv = $('pv'); pv.className = '';
-  pv.innerHTML = `<div class="pages"><div class="pg" data-r="0.75"><img alt="" src="${url}"></div></div><div class="zoombar"><button aria-label="축소" data-z="-1">−</button><button aria-label="확대" data-z="1">+</button></div>`;
-  const im = pv.querySelector('img'), pg = pv.querySelector('.pg');
-  const fit = () => { pg.dataset.r = String(im.naturalHeight / im.naturalWidth || 0.75); ZOOM = 1; const w = Math.min(baseW(), (pv.clientHeight - 28) / +pg.dataset.r); pg.style.width = w + 'px'; pg.style.height = w * +pg.dataset.r + 'px'; };
-  im.onload = fit; fit();
-  bindZoom();
-}
-
-/* 엑셀: 시트별 표 (값만) */
-async function showXls(blob, my) {
-  if (!window.XLSX) await loadScript('vendor/xlsx.full.min.js');
-  const wb = XLSX.read(new Uint8Array(await blob.arrayBuffer()), { type: 'array', cellStyles: false, cellDates: true, dense: false });
-  if (my !== SEQ) return;
-  stopPdf();
-  const pv = $('pv'); pv.className = 'light';
-  const draw = name => {
-    const ws = wb.Sheets[name];
-    let html = '<div class="xl">';
-    if (!ws || !ws['!ref']) html += '<p class="more">빈 시트입니다.</p>';
-    else {
-      const R = XLSX.utils.decode_range(ws['!ref']), MR = 400, MC = 40;
-      const r1 = Math.min(R.e.r, R.s.r + MR - 1), c1 = Math.min(R.e.c, R.s.c + MC - 1);
-      const skip = new Set(), span = {};
-      (ws['!merges'] || []).forEach(m => { span[m.s.r + ',' + m.s.c] = m; for (let r = m.s.r; r <= m.e.r; r++) for (let c = m.s.c; c <= m.e.c; c++) if (r !== m.s.r || c !== m.s.c) skip.add(r + ',' + c); });
-      html += '<table><tr><th class="rh"></th>';
-      for (let c = R.s.c; c <= c1; c++) html += `<th class="rh">${XLSX.utils.encode_col(c)}</th>`;
-      html += '</tr>';
-      for (let r = R.s.r; r <= r1; r++) {
-        html += `<tr><td class="rh">${r + 1}</td>`;
-        for (let c = R.s.c; c <= c1; c++) {
-          const k = r + ',' + c; if (skip.has(k)) continue;
-          const cell = ws[XLSX.utils.encode_cell({ r, c })], m = span[k];
-          const v = cell ? (cell.w != null ? cell.w : cell.v instanceof Date ? cell.v.toLocaleDateString('ko-KR') : cell.v) : '';
-          const num = cell && cell.t === 'n';
-          html += `<td${m ? ` colspan="${Math.min(m.e.c, c1) - c + 1}" rowspan="${Math.min(m.e.r, r1) - r + 1}"` : ''}${num ? ' style="text-align:right;font-family:var(--f-num)"' : ''}>${esc(v)}</td>`;
-        }
-        html += '</tr>';
-      }
-      html += '</table>';
-      if (R.e.r > r1 || R.e.c > c1) html += `<p class="more">앞부분(${r1 - R.s.r + 1}행 × ${c1 - R.s.c + 1}열)만 보입니다. 전체는 「다른 앱으로 열기」로 보세요.</p>`;
-    }
-    html += '<p class="more">칸 값만 보입니다. 서식·그래프는 「다른 앱으로 열기」로 보세요.</p></div>';
-    pv.innerHTML = (wb.SheetNames.length > 1 ? `<div class="sheetTabs">${wb.SheetNames.map(n => `<button data-s="${esc(n)}" aria-pressed="${n === name}">${esc(n)}</button>`).join('')}</div>` : '') + html;
-    const t = pv.querySelector('.sheetTabs'); if (t) t.onclick = e => { const b = e.target.closest('button'); if (b) draw(b.dataset.s); };
-  };
-  draw(wb.SheetNames[0]);
-}
-
-/* 한글(hwpx): 글과 표, 그림만 간단히 */
-async function showHwpx(blob, my) {
-  const zip = await JSZip.loadAsync(blob);
-  const secs = Object.keys(zip.files).filter(n => /^Contents\/section\d+\.xml$/i.test(n)).sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0]);
-  if (!secs.length) throw new Error('hwpx 본문을 찾지 못했습니다');
-  const bins = Object.keys(zip.files).filter(n => /^BinData\//i.test(n));
-  const imgs = {};
-  const imgUrl = async ref => {
-    if (imgs[ref] !== undefined) return imgs[ref];
-    const n = bins.find(b => b.replace(/^BinData\//i, '').replace(/\.[^.]+$/, '') === ref);
-    if (!n || !/\.(png|jpe?g|gif|bmp)$/i.test(n)) return (imgs[ref] = '');
-    return (imgs[ref] = URL.createObjectURL(new Blob([await zip.file(n).async('uint8array')], { type: /png$/i.test(n) ? 'image/png' : 'image/jpeg' })));
-  };
-  const out = [];
-  for (let si = 0; si < secs.length; si++) {
-    if (si) out.push('<hr>');
-    const xml = new DOMParser().parseFromString(await zip.file(secs[si]).async('string'), 'application/xml');
-    const root = xml.documentElement;
-    for (const p of [...root.children].filter(c => c.localName === 'p')) await para(p, out);
-  }
-  async function para(p, out) {
-    let txt = '', any = false;
-    const flush = () => { out.push(`<p>${esc(txt)}</p>`); txt = ''; any = true; };
-    async function rec(n) {
-      for (const c of n.children) {
-        const ln = c.localName;
-        if (ln === 't') txt += c.textContent;
-        else if (ln === 'tbl') { if (txt) flush(); out.push(await table(c)); any = true; }
-        else if (ln === 'pic') { const im = c.getElementsByTagNameNS('*', 'img')[0]; const u = im ? await imgUrl(im.getAttribute('binaryItemIDRef')) : ''; if (u) { if (txt) flush(); out.push(`<img alt="" src="${u}">`); any = true; } }
-        else if (ln === 'lineBreak') txt += '\n';
-        else if (ln === 'tab') txt += '\t';
-        else if (ln === 'secPr' || ln === 'ctrl' || ln === 'linesegarray') continue;
-        else await rec(c);
-      }
-    }
-    await rec(p);
-    if (txt || !any) flush();
-  }
-  async function table(tbl) {
-    let h = '<table>';
-    for (const tr of [...tbl.children].filter(c => c.localName === 'tr')) {
-      h += '<tr>';
-      for (const tc of [...tr.children].filter(c => c.localName === 'tc')) {
-        const sp = [...tc.children].find(c => c.localName === 'cellSpan');
-        const cs = sp ? +sp.getAttribute('colSpan') || 1 : 1, rs = sp ? +sp.getAttribute('rowSpan') || 1 : 1;
-        const inner = [];
-        const sub = [...tc.children].find(c => c.localName === 'subList') || tc;
-        for (const p of [...sub.children].filter(c => c.localName === 'p')) await para(p, inner);
-        h += `<td${cs > 1 ? ` colspan="${cs}"` : ''}${rs > 1 ? ` rowspan="${rs}"` : ''}>${inner.join('')}</td>`;
-      }
-      h += '</tr>';
-    }
-    return h + '</table>';
-  }
-  if (my !== SEQ) return;
-  stopPdf();
-  const pv = $('pv'); pv.className = 'light';
-  pv.innerHTML = `<div class="hw">${out.join('')}</div><p class="note" style="text-align:center;padding:0 16px 16px">글과 표만 간단히 보입니다. 한글 서식 그대로는 「다른 앱으로 열기」(한컴오피스)로 보세요.</p>`;
+  await previewBlob(f, blob, my);
 }
 
 /* 현장사진 묶음 */
@@ -643,9 +518,6 @@ function showPhotos(d) {
 }
 
 /* 다른 앱으로 열기 · 내려받기 */
-const native = () => !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-const b64 = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(b); });
-const safeName = n => String(n || '파일').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 120);
 async function curBlob() {
   const f = CURF; if (!f) return null;
   if (f.photo) { const b = await assets.blob(f.id); return b ? new Blob([b], { type: 'image/jpeg' }) : null; }
@@ -654,23 +526,7 @@ async function curBlob() {
 $('vOpen').onclick = async () => {
   const f = CURF; if (!f) return;
   const blob = await curBlob(); if (!blob) return toast('파일을 아직 받지 못했습니다');
-  const mime = f.type && f.type !== 'application/octet-stream' ? f.type : mimeOf(f.name);
-  if (native()) {
-    const P = window.Capacitor.Plugins;
-    try {
-      const w = await P.Filesystem.writeFile({ path: 'open/' + safeName(f.name), data: await b64(blob), directory: 'CACHE', recursive: true });
-      if (P.FileOpener) {
-        try { await P.FileOpener.open({ filePath: w.uri, contentType: mime, openWithDefault: false }); return; } catch (e) { console.warn(e); }
-        try { await P.FileOpener.open({ filePath: w.uri, contentType: '*/*', openWithDefault: false }); return; } catch (e) { console.warn(e); }
-      }
-      await P.Share.share({ title: f.name, files: [w.uri], dialogTitle: '열 앱 고르기' });
-    } catch (e) { if (!/cancel/i.test(String(e && e.message))) toast('열지 못했습니다: ' + (e && e.message || e)); }
-    return;
-  }
-  const u = URL.createObjectURL(new Blob([blob], { type: mime }));
-  const w = window.open(u, '_blank');
-  if (!w) { const a = document.createElement('a'); a.href = u; a.download = f.name; document.body.append(a); a.click(); a.remove(); }
-  setTimeout(() => URL.revokeObjectURL(u), 60000);
+  try { await openExternal(f.name, blob, f.type); } catch (e) { toast('열지 못했습니다: ' + (e && e.message || e)); }
 };
 $('vSave').onclick = async () => {
   const f = CURF; if (!f) return;
@@ -736,7 +592,7 @@ $('fDel').onclick = async () => {
   busy('지우는 중…');
   try {
     for (const f of d.files || []) { try { await assets.delete(f.id); } catch (e) {} }
-    await db.doc('subm/' + d.id).delete();
+    await db.doc(COL + '/' + d.id).delete();
     $('edOv').hidden = true; ED = null; closeView(); toast('서류를 지웠습니다');
   } catch (e) { toast('지우지 못했습니다: ' + (e && e.message || e)); }
   busy('');
@@ -744,7 +600,7 @@ $('fDel').onclick = async () => {
 $('ed').onsubmit = async e => {
   e.preventDefault();
   const name = $('fName').value.trim();
-  if (!name) { $('fName').focus(); return toast('제출서류명을 적어 주세요'); }
+  if (!name) { $('fName').focus(); return toast('서류명을 적어 주세요'); }
   busy('저장하는 중…');
   try {
     const files = [];
@@ -758,7 +614,8 @@ $('ed').onsubmit = async e => {
     const id = ED.id || ('d' + rid());
     const old = DOCS.find(x => x.id === id) || {};
     const rec = { no: $('fNo').value.trim() === '' ? nextNo() : (+$('fNo').value || $('fNo').value.trim()), name, status: ED.status, date: $('fDate').value || '', memo: $('fMemo').value.trim(), files, photos: ED.photos.slice(), at: Date.now(), by: me, created: old.created || Date.now() };
-    await db.doc('subm/' + id).set(rec);
+    if (MODE === 'gisung') rec.round = old.round || ROUND;
+    await db.doc(COL + '/' + id).set(rec);
     for (const rm of ED.removed) { try { await assets.delete(rm); } catch (err) {} }
     $('edOv').hidden = true; ED = null;
     toast('저장했습니다' + (files.some(f => f.at > Date.now() - 60000) ? ' · 파일은 인터넷이 연결되면 서버로 올라갑니다' : ''));
@@ -805,9 +662,20 @@ window.SUBM = {
   if (!window.claude || !claude.use) { $('empty').hidden = false; $('empty').textContent = '앱 안에서 열어 주세요.'; return; }
   db = await claude.use('db'); assets = await claude.use('assets'); dls = await claude.use('downloads');
   const u = await claude.use('user'); if (u) { try { me = await u.id(); } catch (e) {} }
-  db.collection('subm').onSnapshot(s => {
-    DOCS = s.docs.map(x => ({ id: x.id, ...x.data() })).map(d => ({ ...d, status: ST[d.status] ? d.status : 'plan' }));
-    renderList();
+  /* 탭마다 글귀와 보이는 것 */
+  document.title = '공릉천교 ' + WORD;
+  $('listPane').setAttribute('aria-label', WORD + ' 목록');
+  $('thName').textContent = WORD + '명'; $('fNameL').textContent = WORD + '명';
+  $('rbar').hidden = MODE !== 'gisung'; $('filters').hidden = MODE === 'gisung';
+  $('rDel').hidden = MODE !== 'gisung'; $('sumC').hidden = MODE !== 'jungong';
+  $('sumDL').textContent = MODE === 'gisung' ? '기성일' : '준공 예정일';
+  $('sum').classList.toggle('j', MODE === 'jungong');
+  $('seedBtn').textContent = `기본 준공 서류 ${J_PRESET.length}건 넣기`;
+  if (MODE === 'gisung') db.collection('gisungr').onSnapshot(s => { RINFO = {}; s.docs.forEach(x => { const r = x.data(); if (r && +r.n) RINFO[+r.n] = r; }); scope(); renderList(); });
+  if (MODE === 'jungong') db.doc('config/jungong').onSnapshot(s => { JCFG = s.data() || {}; renderList(); });
+  db.collection(COL).onSnapshot(s => {
+    ALL = s.docs.map(x => ({ id: x.id, ...x.data() })).map(d => ({ ...d, status: ST[d.status] ? d.status : 'plan' }));
+    scope(); renderList();
     if (CUR) { const n = DOCS.find(x => x.id === CUR.id); if (!n) closeView(); else if (JSON.stringify(n) !== JSON.stringify(CUR)) openDoc(n.id, CURF && CURF.id); }
   });
   db.collection('photos').orderBy('taken', 'desc').onSnapshot(s => {
