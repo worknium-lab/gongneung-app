@@ -49,6 +49,12 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 .crumb .tt{flex:1;min-width:0;display:flex;flex-direction:column;padding-left:4px}
 .crumb .tt span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crumb .tt b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.quota{display:flex;flex-direction:column;gap:4px;padding:0 4px}
+.quota .qt{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.quota .qt b{font-family:var(--f-num);font-weight:600;color:var(--ink2)}
+.quota .qbar{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.quota .qbar i{display:block;height:100%;width:0;background:var(--accent)}
+.quota.hot .qbar i{background:var(--warn)} .quota.hot .qt b{color:var(--warn)}
 .srow{display:flex;gap:8px}
 .search{flex:1;display:flex;align-items:center;gap:8px;height:44px;border-radius:10px;background:var(--sunk);padding:0 12px;min-width:0}
 .search svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex:none}
@@ -103,6 +109,10 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
         <div class="tt"><span id="cPath"></span><b id="cName">클라우드</b></div>
         <button class="ico" id="reload" aria-label="새로 고침"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.500-5.800M20 4v5h-5"/></svg></button>
       </div>
+      <div class="quota" id="quota" hidden>
+        <div class="qt"><span>현장 폴더 사용량</span><b id="qTxt"></b></div>
+        <div class="qbar"><i id="qBar"></i></div>
+      </div>
       <div class="srow">
         <label class="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><input id="q" placeholder="이 폴더에서 찾기" aria-label="이 폴더에서 찾기"></label>
         <button class="ico box" id="mkBtn" aria-label="새 폴더" disabled><svg viewBox="0 0 24 24" aria-hidden="true" style="width:20px;height:20px;stroke-width:1.8"><path d="M3 6h7l2 2h9v11H3z"/><path d="M12 11v5M9.500 13.500h5"/></svg></button>
@@ -153,6 +163,7 @@ const sb = STORE && STORE.sb;
 const gw = () => sb.schema('groupware');
 const BUCKET = 'cloud', CHUNK = 6 * 1024 * 1024, MAXOPEN = 150 * 1024 * 1024;
 const FIELDS = 'id,owner,parent_id,name,is_folder,size,mime,updated_at';
+let QUOTA = null;   // 현장 폴더 용량 한도 {quota_bytes, used_bytes} (한도가 없으면 null)
 let UID = null, ROOTS = [], SINGLE = false, PATH = [], ITEMS = [], CUR = null, CURBLOB = null, LSEQ = 0;
 let toastT = 0;
 function toast(t) { const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => e.hidden = true, 3000); }
@@ -163,6 +174,7 @@ function fail(e) {
   const m = String(e && (e.message || e.error_description) || e);
   if (!navigator.onLine || /failed to fetch|network|load failed/i.test(m)) return '인터넷에 연결되지 않았습니다. 클라우드는 연결돼 있을 때만 볼 수 있습니다.';
   if (e && e.code === '23505') return '같은 이름이 이미 있습니다.';
+  if (/용량 한도/.test(m)) return m.replace('넘어요', '넘습니다');
   if (/row-level security|permission|not authorized|unauthorized|403/i.test(m)) return '이 폴더에 올릴 권한이 없습니다.';
   return m;
 }
@@ -193,7 +205,19 @@ async function start() {
     const keep = PATH.length && ROOTS.some(r => r.id === PATH[0].id);
     if (!keep) PATH = SINGLE ? [ROOTS[0]] : [];
     await load();
+    loadQuota();
   } catch (e) { console.warn(e); showMsg(fail(e), true); }
+}
+/* 용량 한도와 사용량 (맨 위 폴더 기준). 서버에 한도가 없으면 표시하지 않음 */
+const gb = b => b >= 1073741824 ? (b / 1073741824).toFixed(b >= 10737418240 ? 0 : 1) + 'GB' : Math.max(0, Math.round(b / 1048576)) + 'MB';
+async function loadQuota() {
+  const root = PATH[0]; QUOTA = null;
+  if (root && root.id) { try { const r = await gw().rpc('cloud_quota_info', { p_folder: root.id }); if (!r.error && r.data && r.data[0]) QUOTA = r.data[0]; } catch (e) {} }
+  if (root !== PATH[0]) return;
+  $('quota').hidden = !QUOTA; if (!QUOTA) return;
+  const p = Math.min(100, QUOTA.used_bytes / QUOTA.quota_bytes * 100);
+  $('qTxt').textContent = `${gb(QUOTA.used_bytes)} / ${gb(QUOTA.quota_bytes)}`;
+  $('qBar').style.width = Math.max(p, 1) + '%'; $('quota').classList.toggle('hot', p >= 90);
 }
 function showMsg(t, retry) {
   $('rows').hidden = true; $('foot').hidden = true; $('empty').hidden = false; $('emptyT').textContent = t; $('retry').hidden = !retry;
@@ -244,7 +268,7 @@ $('rows').addEventListener('click', e => {
   const it = ITEMS.find(x => (x.id || '') === b.dataset.id); if (!it) return;
   if (it.is_folder) { PATH.push(PATH.length ? { ...it, write: PATH[0].write } : it); load(); } else openFile(it);
 });
-$('upDir').onclick = () => { PATH.pop(); load(); };
+$('upDir').onclick = () => { PATH.pop(); load(); if (!PATH.length) loadQuota(); };
 $('reload').onclick = () => start();
 $('retry').onclick = () => start();
 addEventListener('online', () => { if (!$('retry').hidden) start(); });
@@ -321,7 +345,9 @@ $('upBtn').onclick = () => $('upInput').click();
 $('upInput').onchange = async e => {
   const files = [...e.target.files]; e.target.value = '';
   const c = cur(); if (!files.length || !c || JOB) return;
-  const total = files.reduce((s, f) => s + f.size, 0); let sentBefore = 0, ok = 0, stop = false, err = null;
+  const total = files.reduce((s, f) => s + f.size, 0);
+  if (QUOTA && QUOTA.used_bytes + total > QUOTA.quota_bytes) return toast(`용량 한도를 넘어 올릴 수 없습니다 (한도 ${gb(QUOTA.quota_bytes)}, 사용 중 ${gb(QUOTA.used_bytes)}, 고른 파일 ${gb(total)})`);
+  let sentBefore = 0, ok = 0, stop = false, err = null;
   const taken = new Set(ITEMS.map(it => String(it.name).toLowerCase()));
   $('up').hidden = false; $('upBtn').disabled = true; $('upBar').style.width = '0';
   for (let i = 0; i < files.length && !stop; i++) {
@@ -340,6 +366,7 @@ $('upInput').onchange = async e => {
   JOB = null; $('up').hidden = true;
   toast(err ? `올리지 못했습니다 (${ok}개 올림): ${fail(err)}` : ok < files.length ? `취소했습니다 (${ok}개 올림)` : `${ok}개를 올렸습니다`);
   if (cur() === c) load(); else head();
+  loadQuota();
 };
 $('upCancel').onclick = () => JOB && JOB.cancel();
 

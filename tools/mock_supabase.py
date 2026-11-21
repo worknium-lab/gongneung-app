@@ -18,6 +18,7 @@ USER = {'id': '11111111-1111-1111-1111-111111111111', 'email': 'test@site.kr', '
 ADMIN = '22222222-2222-2222-2222-222222222222'
 ITEMS = {}     # id -> cloud_items 행
 GRANTS = []
+QUOTA_USED = [0]
 TUS = {}       # id -> {'len', 'meta', 'data'}
 
 
@@ -192,6 +193,11 @@ class H(SimpleHTTPRequestHandler):
                 return self.js({'code': '42501', 'message': 'new row violates row-level security policy for table "cloud_items"'}, 403)
             add_item(r['parent_id'], r['name'], bool(r.get('is_folder')), r.get('size', 0), r.get('mime', ''), r.get('id'), r['owner'])
             self.send_response(201); self.cors(); self.end_headers(); return
+        if u.path == '/rest/v1/rpc/cloud_quota_info':   # 한도 50GB 흉내 (QUOTA_USED 로 사용량 바꿔 시험)
+            used = QUOTA_USED[0] + sum(x['size'] for x in ITEMS.values() if not x['is_folder'])
+            return self.js([{'folder_id': json.loads(self.body())['p_folder'], 'quota_bytes': 50 * 1024 ** 3, 'used_bytes': used}])
+        if u.path == '/__quota_used':
+            QUOTA_USED[0] = int(json.loads(self.body())['used']); return self.js({'ok': 1})
         if u.path == '/storage/v1/upload/resumable':
             tid = str(uuid.uuid4())
             TUS[tid] = {'len': int(self.headers['Upload-Length']), 'meta': self.headers['Upload-Metadata'], 'data': bytearray(self.body())}

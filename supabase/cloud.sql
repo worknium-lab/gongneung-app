@@ -78,7 +78,81 @@ create policy "공유받은 클라우드 파일 올리기" on storage.objects fo
   with check (bucket_id = 'cloud' and (storage.foldername(name))[1] <> auth.uid()::text
               and groupware.cloud_can_upload_to((storage.foldername(name))[1]));
 
+-- ---------- 폴더 용량 한도 ----------
+-- 폴더 하나에 한도를 걸면 그 안(하위 폴더 · 휴지통에 든 것 포함)의 파일 크기 합이 한도를 넘는 올리기 · 옮겨 넣기를 막음
+-- 누가 올리든(주인 · 공유받은 계정 · 서버 명령) 똑같이 적용. 한도 걸기/바꾸기는 맨 아래 예시
+create table if not exists groupware.cloud_quotas (
+  folder_id uuid primary key references groupware.cloud_items(id) on delete cascade,
+  quota_bytes bigint not null check (quota_bytes > 0),
+  created_at timestamptz not null default now()
+);
+alter table groupware.cloud_quotas enable row level security;   -- 직접 읽고 쓰기는 막고, 아래 함수로만 봄
+
+-- 이 항목(또는 그 위 폴더) 중 한도가 걸린 가장 가까운 폴더
+create or replace function groupware.cloud_quota_root(p_item uuid)
+returns uuid language sql stable security definer set search_path = '' as $$
+  with recursive up as (
+    select id, parent_id, 0 as depth from groupware.cloud_items where id = p_item
+    union all
+    select c.id, c.parent_id, up.depth + 1 from groupware.cloud_items c join up on c.id = up.parent_id
+  )
+  select up.id from up join groupware.cloud_quotas q on q.folder_id = up.id order by up.depth limit 1
+$$;
+-- 폴더 안 파일 크기 합 (p_except 와 그 아래는 빼고 셈)
+create or replace function groupware.cloud_subtree_size(p_folder uuid, p_except uuid default null)
+returns bigint language sql stable security definer set search_path = '' as $$
+  with recursive t as (
+    select id, size, is_folder from groupware.cloud_items where id = p_folder
+    union all
+    select c.id, c.size, c.is_folder from groupware.cloud_items c join t on c.parent_id = t.id
+    where p_except is null or c.id <> p_except
+  )
+  select coalesce(sum(size) filter (where not is_folder), 0)::bigint from t
+$$;
+create or replace function groupware.cloud_quota_check() returns trigger
+language plpgsql security definer set search_path = '' as $$
+declare v_root uuid; v_quota bigint; v_used bigint; v_add bigint;
+begin
+  if tg_op = 'UPDATE' and new.parent_id is not distinct from old.parent_id and new.size <= old.size then return new; end if;
+  if new.parent_id is null then return new; end if;
+  v_root := groupware.cloud_quota_root(new.parent_id);
+  if v_root is null then return new; end if;
+  select quota_bytes into v_quota from groupware.cloud_quotas where folder_id = v_root;
+  v_add := case when new.is_folder then (case when tg_op = 'UPDATE' then groupware.cloud_subtree_size(new.id) else 0 end) else new.size end;
+  if v_add = 0 then return new; end if;
+  v_used := groupware.cloud_subtree_size(v_root, case when tg_op = 'UPDATE' then new.id else null end);
+  if v_used + v_add > v_quota then
+    raise exception '클라우드 용량 한도를 넘어요 (한도 %, 사용 중 %, 넣으려는 크기 %)',
+      pg_size_pretty(v_quota), pg_size_pretty(v_used), pg_size_pretty(v_add) using errcode = '53100';
+  end if;
+  return new;
+end $$;
+drop trigger if exists cloud_quota_check on groupware.cloud_items;
+create trigger cloud_quota_check before insert or update of parent_id, size on groupware.cloud_items
+  for each row execute function groupware.cloud_quota_check();
+
+-- 앱 · 그룹웨어 화면용: 이 폴더에 적용되는 한도와 사용량 (주인이거나 공유받은 사람만, 한도가 없으면 빈 결과)
+create or replace function groupware.cloud_quota_info(p_folder uuid)
+returns table (folder_id uuid, quota_bytes bigint, used_bytes bigint)
+language sql stable security definer set search_path = '' as $$
+  select q.folder_id, q.quota_bytes, groupware.cloud_subtree_size(q.folder_id)
+  from groupware.cloud_quotas q
+  where q.folder_id = groupware.cloud_quota_root(p_folder)
+    and (exists (select 1 from groupware.cloud_items i where i.id = p_folder and i.owner = auth.uid())
+         or groupware.cloud_granted(p_folder, false))
+$$;
+revoke all on function groupware.cloud_quota_root(uuid), groupware.cloud_subtree_size(uuid, uuid), groupware.cloud_quota_check(),
+  groupware.cloud_quota_info(uuid) from public, anon, authenticated;
+grant execute on function groupware.cloud_quota_info(uuid) to authenticated;
+
 notify pgrst, 'reload schema';
+
+-- 한도 걸기/바꾸기 예시 (50GB):
+-- insert into groupware.cloud_quotas (folder_id, quota_bytes)
+-- select id, 50::bigint * 1024 * 1024 * 1024 from groupware.cloud_items
+-- where name = '01 공릉천교 내진보강공사' and parent_id is null and trashed_at is null
+-- on conflict (folder_id) do update set quota_bytes = excluded.quota_bytes;
+-- 한도 없애기: delete from groupware.cloud_quotas where folder_id = '...';
 
 -- 공유 걸기 예시 (admin 의 '01 공릉천교 내진보강공사' 폴더를 앱 계정에):
 -- insert into groupware.cloud_grants (folder_id, user_id, can_write)
