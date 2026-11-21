@@ -385,7 +385,7 @@ function setTab(t) {
 }
 $('tabs').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setTab(b.dataset.t); });
 function tabEdge() { const n = $('tabs'); n.classList.toggle('more-l', n.scrollLeft > 4); n.classList.toggle('more-r', n.scrollLeft + n.clientWidth < n.scrollWidth - 4); }
-$('tabs').addEventListener('scroll', tabEdge, { passive: true }); window.addEventListener('resize', tabEdge); setTimeout(tabEdge, 0);
+$('tabs').addEventListener('scroll', tabEdge, { passive: true }); window.addEventListener('resize', () => { const tb = document.querySelector('#tabs button[aria-current="page"]'); if (tb) tb.scrollIntoView({ block: 'nearest', inline: 'nearest' }); tabEdge(); }); setTimeout(tabEdge, 0);
 let PV = 'status';
 $('progSub').addEventListener('click', e => {
   const b = e.target.closest('[data-pv]'); if (!b) return; PV = b.dataset.pv;
