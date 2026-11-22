@@ -196,6 +196,24 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
 .pick .grid button span{position:absolute;left:0;right:0;bottom:0;background:rgba(22,32,39,.7);color:#fff;font-size:10.5px;padding:1px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
 .pick .ft2{padding:10px 12px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);display:flex;gap:8px;align-items:center}
 .pick .ft2 span{flex:1;font-size:13px;color:var(--muted)}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.g3 .btn{height:58px;flex-direction:column;gap:2px;font-size:13px;padding:0 4px}
+.crumb2{display:flex;align-items:center;gap:4px;padding:8px 8px 6px;border-bottom:1px solid var(--line2);min-height:52px}
+.crumb2 .tt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.crumb2 .tt span{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crumb2 .tt b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow{appearance:none;width:100%;display:flex;align-items:center;gap:10px;min-height:56px;padding:6px 8px;border:0;border-bottom:1px solid var(--line2);background:none;text-align:left}
+.crow[aria-pressed="true"]{background:var(--accent-soft,#d9e7f0)}
+.crow:disabled{opacity:.5;cursor:not-allowed}
+.crow .ic{flex:none;width:40px;height:40px;border-radius:8px;background:var(--sunk);display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--ink2)}
+.crow .ic svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+.crow .nm{flex:1;min-width:0;display:flex;flex-direction:column}
+.crow .nm b{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow .nm span{font-size:12px;color:var(--muted);font-family:var(--f-num)}
+.crow i{flex:none;width:26px;height:26px;border-radius:13px;border:2px solid var(--line);font-style:normal;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.crow[aria-pressed="true"] i{background:var(--accent);border-color:var(--accent)}
+.crow .go svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2}
+.cmsg{padding:28px 12px;text-align:center;color:var(--muted);font-size:14px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom,0px));background:var(--fg);color:#fff;padding:9px 14px;border-radius:8px;font-size:13px;z-index:40;max-width:90%;text-align:center}
 .busy{position:fixed;inset:0;z-index:30;background:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
 </style>
@@ -265,12 +283,13 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
     <label class="fld"><span id="fDateLbl">예정일</span><input id="fDate" type="date" class="num"></label>
     <div class="fld" style="gap:6px">첨부 파일
       <div class="flist" id="fFiles"></div>
-      <div class="g2">
+      <div class="g3">
         <button type="button" class="btn dash" id="fUp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4M7 9l5-5 5 5M5 15v5h14v-5"/></svg>파일 올리기</button>
         <button type="button" class="btn dash" id="fPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>현장사진에서</button>
+        <button type="button" class="btn dash" id="fCl"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.5-9A6 6 0 0 1 18 10a4 4 0 0 1 0 8z"/><path d="M12 11v5M9.5 13.5L12 16l2.5-2.5"/></svg>클라우드에서</button>
       </div>
       <input type="file" id="fInput" multiple hidden>
-      <p class="note">PDF · 엑셀(xlsx·xls) · 한글(hwpx·hwp) · 사진 등 · 한 파일 최대 50MB</p>
+      <p class="note">PDF · 엑셀(xlsx·xls) · 한글(hwpx·hwp) · 사진 등 · 한 파일 최대 50MB · 클라우드에서 고른 파일은 사본이 서류에 붙습니다</p>
     </div>
     <label class="fld">메모<textarea id="fMemo" placeholder="제출처, 회신 내용 등" maxlength="1000"></textarea></label>
     <div class="two" id="edBtns" style="grid-template-columns:1fr 2fr">
@@ -285,6 +304,17 @@ body.viewing #viewPane{display:flex;flex:1;min-width:0}
     <div class="hd"><h2>현장사진에서 고르기</h2><button class="ico" id="pkClose" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="bd" id="pkBody"></div>
     <div class="ft2"><span id="pkCnt">0장 고름</span><button class="btn pri" id="pkOk">넣기</button></div>
+  </div>
+</div>
+<div class="ov" id="ckOv" hidden>
+  <div class="pick" role="dialog" aria-modal="true" aria-label="클라우드에서 고르기">
+    <div class="hd"><h2>클라우드에서 고르기</h2><button class="ico" id="ckClose" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="crumb2">
+      <button class="ico" id="ckUp" aria-label="위 폴더로" hidden><svg viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div class="tt"><span id="ckPath">니움클라우드</span><b id="ckName">클라우드</b></div>
+    </div>
+    <div class="bd" id="ckBody" style="padding:0 6px 16px"></div>
+    <div class="ft2"><span id="ckCnt">0개 고름</span><button class="btn pri" id="ckOk" disabled>넣기</button></div>
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
@@ -558,7 +588,7 @@ function edSt() {
 $('fSt').onclick = e => { const b = e.target.closest('button'); if (!b) return; ED.status = b.dataset.s; if (ED.status === 'done' && !$('fDate').value) $('fDate').value = today(); edSt(); };
 function edFiles() {
   const x = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  let h = ED.files.map((f, i) => `<div class="frow">${chip(f)}<span class="n">${esc(f.name)}</span>${f.file ? '<span class="new">새 파일</span>' : ''}<span class="sz">${fmtSize(f.size || 0)}</span><button type="button" class="ico" data-rm="${i}" aria-label="${esc(f.name)} 빼기">${x}</button></div>`).join('');
+  let h = ED.files.map((f, i) => `<div class="frow">${chip(f)}<span class="n">${esc(f.name)}</span>${f.file ? `<span class="new">${f.cloud ? '클라우드' : '새 파일'}</span>` : ''}<span class="sz">${fmtSize(f.size || 0)}</span><button type="button" class="ico" data-rm="${i}" aria-label="${esc(f.name)} 빼기">${x}</button></div>`).join('');
   if (ED.photos.length) {
     const ps = ED.photos.slice(0, 3).map(id => PHMAP[id]).filter(Boolean);
     h += `<div class="frow"><span class="ft img">사진</span><span class="n">현장사진 ${ED.photos.length}장</span><span class="ths">${ps.map(p => `<img alt="" data-th="${esc(p.th || '')}" src="${p.thd || 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'}">`).join('')}</span><button type="button" class="ico" data-rm="ph" aria-label="사진 모두 빼기">${x}</button></div>`;
@@ -647,9 +677,114 @@ $('pkBody').onclick = e => {
 $('pkClose').onclick = () => $('pkOv').hidden = true;
 $('pkOk').onclick = () => { const order = PHOTOS.map(p => p.id).filter(id => PK.has(id)); ED.photos = order; $('pkOv').hidden = true; edFiles(); };
 
+/* 클라우드에서 고르기: 니움클라우드(클라우드 탭과 같은 폴더)에서 파일을 받아 새 첨부로 넣음.
+   넣은 뒤에는 보통 첨부와 똑같이 files 버킷에 사본이 저장됨 (클라우드 원본이 바뀌거나 지워져도 서류 첨부는 그대로). 고를 때만 인터넷 필요 */
+const CSB = (() => { try { return window.parent !== window && window.parent.STORE ? window.parent.STORE.sb : null; } catch (e) { return null; } })();
+const cgw = () => CSB.schema('groupware');
+const CFIELDS = 'id,owner,parent_id,name,is_folder,size,mime,updated_at';
+const CK = { uid: null, roots: [], single: false, path: [], items: [], sel: new Map(), seq: 0 };
+const ckCur = () => CK.path[CK.path.length - 1] || null;
+const ckByName = (a, b) => (b.is_folder - a.is_folder) || String(a.name).localeCompare(b.name, 'ko', { numeric: true });
+function ckFail(e) {
+  const m = String(e && (e.message || e.error_description) || e || '');
+  if (!navigator.onLine || /failed to fetch|network|load failed/i.test(m)) return '인터넷에 연결되지 않았습니다. 클라우드는 연결돼 있을 때만 고를 수 있습니다.';
+  if (/row-level security|permission|not authorized|unauthorized|403/i.test(m)) return '클라우드 폴더를 볼 권한이 없습니다.';
+  return m || '불러오지 못했습니다';
+}
+function ckMsg(t, retry) { $('ckBody').innerHTML = `<div class="cmsg">${esc(t)}${retry ? '<br><button class="btn" id="ckRetry" style="margin-top:12px">다시 시도</button>' : ''}</div>`; }
+async function ckStart() {
+  if (!CSB) return ckMsg('앱 안에서 열어 주세요.');
+  ckMsg('불러오는 중…');
+  try {
+    const { data } = await CSB.auth.getSession();
+    if (!data.session) return ckMsg(navigator.onLine ? '서버 로그인이 끊겼습니다. 오른쪽 위 동기화 단추에서 다시 로그인하세요.' : ckFail({}), true);
+    CK.uid = data.session.user.id;
+    let grants = [];
+    const g = await cgw().from('cloud_grants').select('folder_id').eq('user_id', CK.uid);
+    if (!g.error) grants = g.data || []; else if (!/cloud_grants|schema cache|does not exist/i.test(g.error.message || '')) throw g.error;
+    let shared = [];
+    if (grants.length) {
+      const r = await cgw().from('cloud_items').select(CFIELDS).in('id', grants.map(x => x.folder_id)).is('trashed_at', null);
+      if (r.error) throw r.error;
+      shared = (r.data || []).sort(ckByName);
+    }
+    const own = await cgw().from('cloud_items').select('id', { count: 'exact', head: true }).eq('owner', CK.uid).is('parent_id', null).is('trashed_at', null);
+    if (own.error) throw own.error;
+    CK.roots = shared.slice();
+    if (own.count) CK.roots.unshift({ id: null, owner: CK.uid, name: '내 파일', is_folder: true, mine: true });
+    CK.single = CK.roots.length === 1;
+    if (!(CK.path.length && CK.roots.some(r => r.id === CK.path[0].id))) CK.path = CK.single ? [CK.roots[0]] : [];
+    await ckLoad();
+  } catch (e) { console.warn(e); ckMsg(ckFail(e), true); }
+}
+async function ckLoad() {
+  const my = ++CK.seq, c = ckCur();
+  $('ckUp').hidden = CK.path.length <= (CK.single ? 1 : 0);
+  $('ckName').textContent = c ? c.name : '클라우드';
+  $('ckPath').textContent = c ? ['니움클라우드', ...CK.path.slice(0, -1).map(p => p.name)].join(' › ') : '니움클라우드';
+  if (!c) { CK.items = CK.roots; return ckRender(); }
+  ckMsg('불러오는 중…');
+  try {
+    let q = cgw().from('cloud_items').select(CFIELDS).is('trashed_at', null);
+    q = c.id ? q.eq('parent_id', c.id) : q.is('parent_id', null).eq('owner', CK.uid);
+    const { data, error } = await q;
+    if (my !== CK.seq) return;
+    if (error) throw error;
+    CK.items = (data || []).sort(ckByName);
+    ckRender();
+  } catch (e) { if (my === CK.seq) { console.warn(e); ckMsg(ckFail(e), true); } }
+}
+function ckRender() {
+  if (!CK.items.length) return ckMsg(ckCur() ? '빈 폴더입니다.' : '이 계정으로 볼 수 있는 클라우드 폴더가 없습니다. 니움클라우드(admin)에서 현장 폴더를 이 계정에 공유해야 합니다.');
+  const dir = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7l2 2h9v11H3z"/></svg>';
+  $('ckBody').innerHTML = CK.items.map(it => {
+    if (it.is_folder) return `<button class="crow" data-id="${esc(it.id || '')}"><span class="ic">${dir}</span><span class="nm"><b>${esc(it.name)}</b>${it.mine ? '<span>내 니움클라우드</span>' : ''}</span><span class="go"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span></button>`;
+    const big = (it.size || 0) > MAXB, on = CK.sel.has(it.id);
+    return `<button class="crow" data-id="${esc(it.id)}" aria-pressed="${on}" ${big ? 'disabled' : ''}><span class="ic">${esc(kind(it) === 'img' ? '사진' : (ext(it.name).toUpperCase().slice(0, 4) || '파일'))}</span><span class="nm"><b>${esc(it.name)}</b><span>${fmtSize(it.size || 0)}${big ? ' · 50MB 넘어 넣을 수 없음' : ''} · ${String(it.updated_at || '').slice(0, 10).replace(/-/g, '.')}</span></span><i>${on ? '✓' : ''}</i></button>`;
+  }).join('');
+}
+function ckCount() {
+  const n = CK.sel.size, b = [...CK.sel.values()].reduce((s, x) => s + (x.size || 0), 0);
+  $('ckCnt').textContent = n ? `${n}개 고름 · ${fmtSize(b)}` : '0개 고름';
+  $('ckOk').disabled = !n;
+}
+$('fCl').onclick = () => { CK.sel = new Map(); ckCount(); $('ckOv').hidden = false; ckStart(); };
+$('ckBody').onclick = e => {
+  if (e.target.closest('#ckRetry')) return ckStart();
+  const b = e.target.closest('.crow'); if (!b || b.disabled) return;
+  const it = CK.items.find(x => (x.id || '') === b.dataset.id); if (!it) return;
+  if (it.is_folder) { CK.path.push(it); return ckLoad(); }
+  CK.sel.has(it.id) ? CK.sel.delete(it.id) : CK.sel.set(it.id, it);
+  b.setAttribute('aria-pressed', String(CK.sel.has(it.id))); b.querySelector('i').textContent = CK.sel.has(it.id) ? '✓' : '';
+  ckCount();
+};
+$('ckUp').onclick = () => { CK.path.pop(); ckLoad(); };
+$('ckClose').onclick = () => { $('ckOv').hidden = true; ++CK.seq; };
+$('ckOk').onclick = async () => {
+  const list = [...CK.sel.values()]; if (!list.length || !ED) return;
+  let ok = 0; const bad = [];
+  for (let i = 0; i < list.length; i++) {
+    const it = list[i];
+    busy(`클라우드에서 받는 중… ${it.name} (${i + 1}/${list.length})`);
+    try {
+      const { data, error } = await CSB.storage.from('cloud').download(`${it.owner}/${it.id}`);
+      if (error || !data) throw error || new Error('받지 못했습니다');
+      const type = it.mime && it.mime !== 'application/octet-stream' ? it.mime : mimeOf(it.name);
+      const file = new File([data], String(it.name), { type });
+      if (file.size > MAXB) { bad.push(it.name + '(50MB 넘음)'); continue; }
+      ED.files.push({ file, name: String(it.name).slice(0, 160), size: file.size, type, cloud: true });
+      ok++;
+    } catch (e) { console.warn(e); bad.push(it.name); if (!navigator.onLine) break; }
+  }
+  busy('');
+  $('ckOv').hidden = true; edFiles();
+  toast(bad.length ? `${ok}개 넣음 · 못 받은 파일: ${bad.join(', ')}` : `클라우드 파일 ${ok}개를 넣었습니다. 「저장」을 눌러야 서류에 붙습니다`);
+};
+
 /* 안드로이드 뒤로 가기 */
 window.SUBM = {
   back() {
+    if (!$('ckOv').hidden) { if (CK.path.length > (CK.single ? 1 : 0)) { CK.path.pop(); ckLoad(); } else $('ckOv').hidden = true; return true; }
     if (!$('pkOv').hidden) { $('pkOv').hidden = true; return true; }
     if (!$('edOv').hidden) { $('edOv').hidden = true; ED = null; return true; }
     if (document.body.classList.contains('viewing') && !matchMedia('(min-width:900px)').matches) { closeView(); return true; }

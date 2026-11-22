@@ -46,7 +46,7 @@
 - 충돌 처리: 문서 단위로 마지막에 저장한 쪽이 이깁니다. 아직 서버에 올리지 못한 내 수정은 서버 값으로 덮어쓰지 않습니다.
 - 사진: 비공개 버킷 `photos/<id>.jpg`. 기기에도 사본을 보관해 오프라인에서도 볼 수 있습니다.
 - 도면: PDF를 올리면 앱이 쪽마다 긴 변 4200px JPEG(약 0.3~1.4MB)와 목록용 작은 그림을 만들어 사진과 같은 `photos` 버킷에 올립니다. 문서는 `dwgset/<묶음>`, `dwg/<묶음>_<쪽>`(도면번호·도면명·관련 위치·그림 id), 메모는 `dwgnote/<도면>`(획 목록, 그림 좌표). 서버 설정 변경은 필요 없습니다.
-- 제출서류: 문서 `subm/<id>` {no, name, status: plan|work|done, date, memo, files:[{id,name,type,size}], photos:[현장사진 id]}. 첨부 파일은 `files` 버킷(아무 형식, 한 파일 50MB)에 `f…` 이름으로 저장 — 처음 한 번 `supabase/files.sql`을 실행해야 합니다. 미리보기: PDF는 pdf.js(+한글 CMap), 엑셀은 SheetJS(값만, 앞 400행×40열), hwpx는 본문 XML의 글·표·그림만. 서식 그대로는 「다른 앱으로 열기」(@capacitor-community/file-opener).
+- 제출서류: 문서 `subm/<id>` {no, name, status: plan|work|done, date, memo, files:[{id,name,type,size}], photos:[현장사진 id]}. 첨부 파일은 `files` 버킷(아무 형식, 한 파일 50MB)에 `f…` 이름으로 저장 — 처음 한 번 `supabase/files.sql`을 실행해야 합니다. 미리보기: PDF는 pdf.js(+한글 CMap), 엑셀은 SheetJS(값만, 앞 400행×40열), hwpx는 본문 XML의 글·표·그림만. 서식 그대로는 「다른 앱으로 열기」(@capacitor-community/file-opener). 첨부는 「파일 올리기」(기기) · 「현장사진에서」 · 「클라우드에서」(니움클라우드 공유 폴더에서 골라 받아 사본을 `files` 버킷에 저장 — 고를 때만 인터넷 필요, 기성 · 준공도 같음) 세 가지로 넣습니다.
   - S펜은 언제나 메모, 손가락은 이동·두 손가락 확대(「손가락으로도 쓰기」를 켜면 한 손가락 메모), PC는 마우스로 메모·휠로 확대. S펜 옆 버튼을 누른 채 쓰면 지우개.
   - 메모는 도면 한 장이 한 문서라서, 두 사람이 같은 도면에 동시에 메모하면 나중에 저장한 쪽이 남습니다.
   - 2026.3 공릉천교 도면집(35쪽, A3)을 올리면 도면번호·도면명·관련 위치를 자동으로 채웁니다 (`www/dwg.html`의 `GN_PRESET`).
