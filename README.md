@@ -23,13 +23,14 @@
 | `www/js/config.js` | Supabase 주소와 공개용 키 |
 | `src/orig/` | 원본 화면. `python3 tools/build_modules.py`를 실행하면 `www/prog.html`과 `www/ilbo.html`을 다시 만듭니다 |
 | `supabase/setup.sql` | 서버 테이블, 권한, 사진 저장소 설정 |
+| `supabase/members.sql` | 사용 허용 목록(`gn_members`)에 계정 넣기 · 빼기 · 점검 |
 | `.github/workflows/android.yml` | main 브랜치에 올릴 때마다 APK를 빌드해 Releases에 올립니다 |
 | `.github/workflows/pages.yml` | PC용 웹을 GitHub Pages에 배포합니다 |
 
 ## 처음 설정 (한 번만)
 
 1. **Supabase 설정**: SQL Editor에서 `supabase/setup.sql`을 실행합니다. 그다음 기존 기록 옮기기 SQL을 실행합니다. 이 SQL 파일은 저장소에 넣지 않고 따로 전달합니다.
-2. **로그인 계정 만들기**: Authentication → Users → Add user에서 만듭니다. Authentication → Sign In / Providers에서 「Allow new users to sign up」을 끄는 것을 권장합니다.
+2. **로그인 계정 만들기**: Authentication → Users → Add user에서 만듭니다. 그다음 **사용 허용 목록(`public.gn_members`)에도 이메일을 넣어야** 앱 기록을 읽고 쓸 수 있습니다 — `supabase/members.sql` 참고. 목록에 없는 계정은 로그인은 되지만 기록이 0건으로 보이고 저장이 거절됩니다(앱 동기화 단추에 「권한 없음」으로 표시). 클라우드 탭 공유(`groupware.cloud_grants`)는 이와 별개입니다. Authentication → Sign In / Providers에서 「Allow new users to sign up」을 끄는 것을 권장합니다.
 3. **APK 서명 키 등록**: GitHub 저장소 Settings → Secrets and variables → Actions에서 다음 두 값을 등록합니다.
    - `ANDROID_KEYSTORE_B64`: 서명 키 파일을 base64로 바꾼 값
    - `ANDROID_KEYSTORE_PASS`: 서명 키 비밀번호
