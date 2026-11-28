@@ -602,13 +602,14 @@ $('rpWr').onclick = async () => { await IW().ILBO.openDate(DATE); await IW().ILB
 $('rpTbm').onclick = async () => { await IW().ILBO.openDate(DATE); await IW().ILBO.word('tbm'); toast('TBM 회의록 Word를 만들었습니다'); };
 
 /* ---------------- 동기화 표시 ---------------- */
-let SST = {};
+let SST = {}, deniedShown = false;
 function fmtAgo(t) { if (!t) return '아직 없음'; const s = Math.round((Date.now() - t) / 1000); return s < 60 ? '방금' : s < 3600 ? Math.round(s / 60) + '분 전' : new Date(t).toLocaleString('ko-KR'); }
 STORE.onStatus(s => {
   SST = s;
   const b = $('syncBtn'); b.className = 'sync';
   let t;
   if (!s.online) t = s.pending ? `오프라인 ${s.pending}건` : '오프라인';
+  else if (s.denied) { b.classList.add('err'); t = '권한 없음'; if (!deniedShown) { deniedShown = true; toast('이 계정은 앱 사용 허용 목록에 없습니다. 관리자에게 등록을 요청하세요.'); } }
   else if (s.lastErr && !s.syncing) { b.classList.add('err'); t = '동기화 오류'; }
   else if (s.pending || s.syncing) { b.classList.add('wait'); t = s.syncing ? '동기화 중' : `보낼 것 ${s.pending}`; }
   else { b.classList.add('ok'); t = '동기화됨'; }

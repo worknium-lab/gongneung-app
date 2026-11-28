@@ -92,6 +92,7 @@
 
   async function write(col, id, data) {           // data === null → 삭제
     await load();
+    if (denied() && col !== 'users') throw Object.assign(new Error(DENY_MSG()), { code: 'invalid_argument' });   // 서버 기록을 못 받은 빈 화면 위에 쓴 것이 나중에 올라가 남의 기록을 덮지 않게
     const k = key(col, id), del = data == null, ts = Date.now();
     if (del) colMap(col).delete(id); else colMap(col).set(id, clone(data));
     PENDING.add(k);
@@ -226,6 +227,21 @@
 
   /* ---------------- 동기화 ---------------- */
   let syncing = false, again = false, lastOk = 0, lastErr = '', timer = 0, chan = null;
+  /* 사용 허용 목록: 서버(public.gn_members)에 등록된 계정만 기록을 읽고 쓸 수 있음 (supabase/members.sql)
+     등록 안 된 계정은 로그인은 되지만 서버가 기록을 0건으로 돌려주고 저장을 거절함 → 빈 화면 + 알 수 없는 오류 대신 바로 알려 줌 */
+  let access = null;              // null 아직 모름 · true 허용 · false 목록에 없음
+  const denied = () => access === false || (access === null && !!myId() && localStorage.getItem('gn-denied') === myId());
+  const DENY_MSG = () => `이 계정(${localStorage.getItem('gn-email') || '-'})은 공릉천교 앱 사용 허용 목록에 없습니다. 관리자에게 계정 등록을 요청하세요. 등록되면 자동으로 동기화됩니다.`;
+  const isRls = e => !!e && (e.code === '42501' || String(e.statusCode) === '403' || /row-level security/i.test(e.message || ''));
+  async function checkAccess() {
+    const { data, error } = await sb.rpc('gn_allowed');
+    if (error) {
+      if (error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message || '')) access = true;   // 허용 목록이 없는 서버(예전 설정 · 시험용)
+      else throw error;
+    } else access = data !== false;
+    if (access) localStorage.removeItem('gn-denied'); else localStorage.setItem('gn-denied', myId());
+    return access;
+  }
   const ST = new Set();
   async function counts() {
     const q = await tx('blobq', 'readonly', s => req(s.count()));
@@ -233,7 +249,7 @@
   }
   async function status() {
     const c = await counts().catch(() => ({ docs: PENDING.size, files: 0 }));
-    const s = { ready: READY, online: navigator.onLine, signedIn: !!session, pending: c.docs + c.files, files: c.files, syncing, lastOk, lastErr, heal: Object.assign({}, HEAL), email: localStorage.getItem('gn-email') || '' };
+    const s = { ready: READY, online: navigator.onLine, signedIn: !!session, denied: denied(), pending: c.docs + c.files, files: c.files, syncing, lastOk, lastErr, heal: Object.assign({}, HEAL), email: localStorage.getItem('gn-email') || '' };
     ST.forEach(f => f(s));
     return s;
   }
@@ -361,6 +377,11 @@
     syncing = true; status();
     try {
       await load();
+      if (access !== true && !(await checkAccess())) {   // 목록에 없으면 받기 · 올리기를 하지 않음 (어차피 0건 · 거절)
+        lastErr = DENY_MSG(); syncing = false; status();
+        if (again) { again = false; kick(); }
+        return;
+      }
       await pull();
       await seedOnce();
       await pushDocs();
@@ -373,6 +394,11 @@
       }
     } catch (e) {
       lastErr = (e && (e.message || e.error_description)) || String(e);
+      if (isRls(e)) {                                   // 쓰던 계정이 허용 목록에서 빠진 경우 등 → 허용 여부를 바로 다시 확인
+        access = null;
+        try { await checkAccess(); } catch (e2) {}
+        lastErr = access === false ? DENY_MSG() : '서버가 저장을 거절했습니다 (권한 없음). 계정이 사용 허용 목록에 있는지 관리자에게 확인하세요. — ' + lastErr;
+      }
       console.warn('sync', e);
     }
     syncing = false; status();
@@ -397,6 +423,7 @@
       const { data, error } = await sb.auth.signInWithPassword({ email, password });
       if (error) throw error;
       session = data.session; localStorage.setItem('gn-uid', session.user.id); localStorage.setItem('gn-email', email);
+      access = null; localStorage.removeItem('gn-denied');
       await load();
       const u = colMap('users').get(session.user.id);
       if (!u) await write('users', session.user.id, { name: email.split('@')[0], email });
@@ -404,10 +431,10 @@
     },
     async signOut() {
       const c = await counts();
-      if (session && c.docs + c.files) throw new Error(   // 서버 로그인이 끊긴 상태면 막지 않음 — 기록은 기기에 남아 다시 로그인 후 올라감
+      if (session && !denied() && c.docs + c.files) throw new Error(   // 서버 로그인이 끊겼거나 허용 목록에 없는 계정이면 막지 않음 — 기록은 기기에 남아 다시 로그인 후 올라감
 `아직 서버에 못 올린 기록이 ${c.docs + c.files}건 있습니다. 인터넷 연결 후 동기화가 끝나면 로그아웃하세요.`);
       try { await sb.auth.signOut(); } catch (e) {}
-      session = null; localStorage.removeItem('gn-uid');
+      session = null; access = null; localStorage.removeItem('gn-uid'); localStorage.removeItem('gn-denied');
     },
     onStatus: f => { ST.add(f); status(); return () => ST.delete(f); },
     onAuth: f => { AUTHL.add(f); return () => AUTHL.delete(f); },

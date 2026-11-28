@@ -20,6 +20,7 @@ ITEMS = {}     # id -> cloud_items 행
 GRANTS = []
 QUOTA_USED = [0]
 TUS = {}       # id -> {'len', 'meta', 'data'}
+MEMBER = ['on']  # 사용 허용 목록 시험: 'on' 등록됨 · 'off' 목록에 없음(기록 0건 · 저장 거절) · 'none' 허용 목록이 없는 예전 서버.  바꾸기: POST /__member {"mode": "off"}
 
 
 def add_item(parent, name, folder, size=0, mime='', id=None, owner=ADMIN):
@@ -141,7 +142,7 @@ class H(SimpleHTTPRequestHandler):
             return self.js(self.cloud_rows(q))
         if u.path == '/rest/v1/docs':
             with LOCK:
-                rows = list(DOCS.values())
+                rows = [] if MEMBER[0] == 'off' else list(DOCS.values())
             for k, v in q.items():
                 v = v[0]
                 if k in ('select', 'order', 'limit'):
@@ -180,8 +181,16 @@ class H(SimpleHTTPRequestHandler):
             if b.get('password') == 'pw1234' or b.get('refresh_token'):
                 return self.js(tok())
             return self.js({'error': 'invalid_grant', 'error_description': 'Invalid login credentials', 'msg': 'Invalid login credentials'}, 400)
+        if u.path == '/rest/v1/rpc/gn_allowed':
+            if MEMBER[0] == 'none':
+                return self.js({'code': 'PGRST202', 'message': 'Could not find the function public.gn_allowed without parameters in the schema cache'}, 404)
+            return self.js(MEMBER[0] == 'on')
+        if u.path == '/__member':
+            MEMBER[0] = json.loads(self.body())['mode']; return self.js({'ok': 1})
         if u.path == '/rest/v1/docs':
             rows = json.loads(self.body())
+            if MEMBER[0] == 'off':
+                return self.js({'code': '42501', 'message': 'new row violates row-level security policy for table "docs"'}, 403)
             with LOCK:
                 for r in rows:
                     REV[0] += 1
